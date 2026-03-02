@@ -3,9 +3,17 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
+use App\Models\Event;
 
 Route::get('/', function () {
-    return view('welcome');
+    // Mengambil 3 kegiatan terdekat yang belum lewat tanggalnya
+    $latestEvents = Event::with('secretariat')
+                         ->whereDate('event_date', '>=', now())
+                         ->orderBy('event_date', 'asc')
+                         ->take(3)
+                         ->get();
+
+    return view('welcome', compact('latestEvents'));
 });
 
 Route::get('/dashboard', function () {
@@ -20,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/kegiatan/{event}/join', [EventController::class, 'join'])->name('events.join');
     Route::get('/riwayat-kegiatan', [EventController::class, 'history'])->name('events.history');
     Route::get('/sertifikat/download/{registration}', [EventController::class, 'downloadCertificate'])->name('certificate.download');
-    
+
     Route::middleware(['role:Admin Sekre|Super Admin Pusat'])->group(function () {
         Route::get('/admin/events', [EventController::class, 'adminIndex'])->name('admin.events.index');
         Route::get('/admin/events/create', [EventController::class, 'create'])->name('admin.events.create');

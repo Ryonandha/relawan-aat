@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Secretariat; // Tambahkan di atas
 
 class ProfileController extends Controller
 {
@@ -16,8 +17,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $secretariats = Secretariat::all(); // Ambil data sekre
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'secretariats' => $secretariats, // Kirim ke view
         ]);
     }
 

@@ -39,6 +39,17 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <div class="mt-4">
+            <x-input-label for="secretariat_id" value="{{ __('Pilih Regional (Sekre)') }}" />
+            <select id="secretariat_id" name="secretariat_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                <option value="" disabled selected>-- Pilih Regional Anda --</option>
+                @foreach($secretariats as $sekre)
+                    <option value="{{ $sekre->id }}">{{ $sekre->name }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('secretariat_id')" class="mt-2" />
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}

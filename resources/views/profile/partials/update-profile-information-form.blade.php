@@ -46,7 +46,29 @@
                 </div>
             @endif
         </div>
+        <div>
+            <x-input-label for="phone_number" value="{{ __('Nomor WhatsApp') }}" />
+            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->phone_number)" placeholder="Contoh: 08123456789" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
+        </div>
 
+        <div>
+            <x-input-label for="institution" value="{{ __('Asal Sekolah / Universitas') }}" />
+            <x-text-input id="institution" name="institution" type="text" class="mt-1 block w-full" :value="old('institution', $user->institution)" placeholder="Contoh: Universitas Jenderal Soedirman" />
+            <x-input-error class="mt-2" :messages="$errors->get('institution')" />
+        </div>
+
+        <div>
+            <x-input-label for="secretariat_id" value="{{ __('Regional (Sekre)') }}" />
+            <select id="secretariat_id" name="secretariat_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                @foreach($secretariats as $sekre)
+                    <option value="{{ $sekre->id }}" {{ old('secretariat_id', $user->secretariat_id) == $sekre->id ? 'selected' : '' }}>
+                        {{ $sekre->name }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('secretariat_id')" />
+        </div>
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\Secretariat;
+use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -19,7 +21,9 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // Ambil semua data sekre untuk ditampilkan di dropdown
+        $secretariats = Secretariat::all();
+        return view('auth.register', compact('secretariats'));
     }
 
     /**
@@ -33,13 +37,17 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'secretariat_id' => ['required', 'exists:secretariats,id'], // Validasi pilihan sekre
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'secretariat_id' => $request->secretariat_id, // Simpan sekre
         ]);
+
+        $user->assignRole('Relawan');
 
         event(new Registered($user));
 

@@ -12,13 +12,19 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class EventController extends Controller
 {
     // Fungsi untuk menampilkan daftar kegiatan
-    public function index()
+   public function index()
     {
-        // Mengambil semua event berserta nama sekrenya
-        $events = Event::with('secretariat')->orderBy('event_date', 'desc')->get();
+        $userSekreId = auth()->user()->secretariat_id;
+
+        // Mengambil event yang HANYA milik sekre relawan tersebut
+        // dan mengurutkan berdasarkan tanggal terbaru
+        $events = Event::with('secretariat')
+                    ->where('secretariat_id', $userSekreId)
+                    ->orderBy('event_date', 'asc')
+                    ->get();
+
         return view('events.index', compact('events'));
     }
-
     // Fungsi untuk memproses pendaftaran relawan
     public function join(Event $event)
     {
