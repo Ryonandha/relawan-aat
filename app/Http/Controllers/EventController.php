@@ -57,13 +57,27 @@ class EventController extends Controller
     // Tambahkan di bagian atas controller
 public function adminIndex()
     {
-        // Tambahkan withCount('registrations') untuk menghitung total peserta
-        $events = Event::withCount('registrations')
-                    ->where('secretariat_id', auth()->user()->secretariat_id)
-                    ->orderBy('event_date', 'desc')
-                    ->get();
-                    
-        return view('admin.events.index', compact('events'));
+        // Mengecek apakah yang login adalah Super Admin Pusat
+        if (auth()->user()->hasRole('Super Admin Pusat')) {
+            // Pusat melihat SEMUA kegiatan dari semua sekre
+            $events = Event::with(['secretariat'])
+                        ->withCount('registrations')
+                        ->orderBy('event_date', 'desc')
+                        ->get();
+            
+            $namaRegional = 'Semua Regional (Pusat)';
+        } else {
+            // Admin Sekre HANYA melihat kegiatan di wilayahnya
+            $events = Event::withCount('registrations')
+                        ->where('secretariat_id', auth()->user()->secretariat_id)
+                        ->orderBy('event_date', 'desc')
+                        ->get();
+            
+            $namaRegional = auth()->user()->secretariat->name ?? 'Wilayah Tidak Diketahui';
+        }
+
+        // Kirim data kegiatan dan nama regional ke tampilan
+        return view('admin.events.index', compact('events', 'namaRegional'));
     }
 
 public function create()
@@ -72,26 +86,33 @@ public function create()
 }
 
 public function store(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'event_date' => 'required|date',
-        'quota' => 'required|integer|min:1',
-    ]);
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'event_date' => 'required|date',
+            'quota' => 'required|integer|min:1',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maksimal 2MB
+        ]);
 
-    Event::create([
-        'title' => $request->title,
-        'description' => $request->description,
-        'event_date' => $request->event_date,
-        'start_time' => $request->start_time,
-        'end_time' => $request->end_time,
-        'quota' => $request->quota,
-        'secretariat_id' => auth()->user()->secretariat_id, // Otomatis masuk ke sekre admin tersebut
-    ]);
+        $imagePath = null;
+        if ($request->hasFile('cover_image')) {
+            // Simpan foto ke folder storage/app/public/event_covers
+            $imagePath = $request->file('cover_image')->store('event_covers', 'public');
+        }
 
-    return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil dibuat!');
-}
+        Event::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'cover_image' => $imagePath, // Masukkan path foto ke database
+            'event_date' => $request->event_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'quota' => $request->quota,
+            'secretariat_id' => auth()->user()->secretariat_id,
+        ]);
 
+        return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil dibuat!');
+    }
 public function participants(Event $event)
 {
     // Memastikan Admin hanya bisa melihat pendaftar di sekrenya sendiri

@@ -20,8 +20,7 @@
             @endif
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl border-t-4 border-aat-blue p-6">
-                <h3 class="text-xl font-extrabold text-gray-800 mb-6">Daftar Kegiatan Regional: <span class="text-aat-yellow">{{ auth()->user()->secretariat->name ?? 'Pusat' }}</span></h3>
-                
+<h3 class="text-xl font-extrabold text-gray-800 mb-6">Daftar Kegiatan: <span class="text-aat-yellow">{{ $namaRegional }}</span></h3>                
                 @if($events->isEmpty())
                     <div class="text-center py-10 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                         <p class="text-gray-500 font-medium">Belum ada kegiatan yang dibuat di regional ini.</p>

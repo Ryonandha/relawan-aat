@@ -15,12 +15,18 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', \Illuminate\Validation\Rule::unique(\App\Models\User::class)->ignore($this->user()->id)],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'institution' => ['nullable', 'string', 'max:255'],
-            'secretariat_id' => ['required', 'exists:secretariats,id'], // Tambahan untuk update profil
         ];
+
+        // Hanya validasi sekre jika yang login adalah Relawan
+        if ($this->user()->hasRole('Relawan')) {
+            $rules['secretariat_id'] = ['required', 'exists:secretariats,id'];
+        }
+
+        return $rules;
     }
 }

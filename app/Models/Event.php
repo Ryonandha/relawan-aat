@@ -20,4 +20,8 @@ class Event extends Model
     {
         return $this->hasMany(EventRegistration::class);
     }
+    protected $fillable = [
+        'title', 'description', 'cover_image', 'event_date', // tambahkan cover_image di sini
+        'start_time', 'end_time', 'quota', 'secretariat_id'
+    ];
 }

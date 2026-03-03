@@ -59,6 +59,8 @@
         </div>
 
         <div>
+            @role('Relawan')
+        <div>
             <x-input-label for="secretariat_id" value="{{ __('Regional (Sekre)') }}" />
             <select id="secretariat_id" name="secretariat_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                 @foreach($secretariats as $sekre)
@@ -68,6 +70,8 @@
                 @endforeach
             </select>
             <x-input-error class="mt-2" :messages="$errors->get('secretariat_id')" />
+        </div>
+        @endrole
         </div>
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>

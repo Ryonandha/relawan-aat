@@ -1,54 +1,47 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-aat-blue leading-tight">
-            {{ __('Dashboard') }}
+            {{ __('Dashboard Relawan AAT') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-aat-blue">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-2xl font-bold text-aat-blue mb-2">
-                        Selamat datang, {{ Auth::user()->name }}!
-                    </h3>
-                    
-                    @role('Super Admin Pusat')
-                        <p class="mb-4 text-gray-600">Anda berada di panel Super Admin Pusat. Di sini Anda memiliki kendali penuh atas semua data regional Yayasan AAT.</p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                            <div class="bg-aat-gray p-4 rounded-lg shadow border-l-4 border-aat-yellow">
-                                <h4 class="font-bold text-lg">Total Relawan</h4>
-                                <p class="text-3xl font-extrabold text-aat-blue">--</p>
-                            </div>
-                            <div class="bg-aat-gray p-4 rounded-lg shadow border-l-4 border-aat-yellow">
-                                <h4 class="font-bold text-lg">Total Sekre</h4>
-                                <p class="text-3xl font-extrabold text-aat-blue">--</p>
-                            </div>
-                        </div>
-                    @endrole
-
-                    @role('Admin Sekre')
-                        <p class="mb-4 text-gray-600">Anda mengelola kegiatan dan relawan khusus untuk regional: <span class="font-bold text-aat-blue">{{ Auth::user()->secretariat->name ?? 'Belum ada sekre' }}</span>.</p>
-                        <div class="mt-4">
-                            <a href="#" class="inline-block bg-aat-blue hover:bg-aat-blue-light text-white font-bold py-2 px-4 rounded transition">
-                                + Buat Kegiatan Baru
-                            </a>
-                        </div>
-                    @endrole
-
-                    @role('Relawan')
-                        <p class="mb-4 text-gray-600">Terima kasih atas dedikasimu menjadi bagian dari Anak-Anak Terang!</p>
-                        <div class="flex gap-4 mt-4">
-                            <a href="{{ route('events.index') }}" class="bg-aat-blue hover:bg-aat-blue-light text-white font-bold py-2 px-4 rounded transition">
-                                🔍 Cari Kegiatan
-                            </a>
-                            <a href="#" class="bg-aat-yellow hover:bg-yellow-500 text-aat-text font-bold py-2 px-4 rounded shadow transition">
-                                📜 Sertifikat & Portofolio
-                            </a>
-                        </div>
-                    @endrole
-
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-t-4 border-aat-yellow p-6">
+                <div class="text-gray-900 font-bold text-xl mb-4">
+                    Selamat datang, {{ Auth::user()->name }}! 👋
                 </div>
+                <p class="text-gray-600 mb-8">
+                    Anda masuk sebagai: <span class="bg-aat-blue text-white px-2 py-1 rounded text-sm">{{ Auth::user()->roles->pluck('name')->first() ?? 'Pengguna' }}</span>
+                    @if(Auth::user()->secretariat)
+                        di regional <strong>{{ Auth::user()->secretariat->name }}</strong>
+                    @endif
+                </p>
+
+                @hasanyrole('Super Admin Pusat|Admin Sekre')
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-blue-50 border border-blue-100 p-6 rounded-xl shadow-sm text-center">
+                        <div class="text-4xl font-extrabold text-aat-blue mb-2">{{ $totalRelawan }}</div>
+                        <div class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Total Relawan</div>
+                    </div>
+                    <div class="bg-yellow-50 border border-yellow-100 p-6 rounded-xl shadow-sm text-center">
+                        <div class="text-4xl font-extrabold text-aat-yellow-dark mb-2">{{ $totalSekre }}</div>
+                        <div class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Regional Aktif</div>
+                    </div>
+                    <div class="bg-green-50 border border-green-100 p-6 rounded-xl shadow-sm text-center">
+                        <div class="text-4xl font-extrabold text-green-600 mb-2">{{ $totalKegiatan }}</div>
+                        <div class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Kegiatan Terdata</div>
+                    </div>
+                </div>
+                @endhasanyrole
+
+                @role('Relawan')
+                <div class="bg-blue-50 border-l-4 border-aat-blue p-4 rounded-r-lg mb-6">
+                    <h3 class="font-bold text-aat-blue">Siap untuk berbagi cahaya hari ini?</h3>
+                    <p class="text-gray-700 mt-2 text-sm">Cek menu <strong>"Cari Kegiatan"</strong> di atas untuk melihat jadwal pendampingan terdekat di regionalmu.</p>
+                </div>
+                @endrole
+
             </div>
         </div>
     </div>
