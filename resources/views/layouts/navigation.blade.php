@@ -1,5 +1,14 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <div class="shrink-0 flex items-center gap-2">
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-aat-blue rounded flex items-center justify-center text-aat-yellow font-bold text-xs">AAT</div>
+                        <span class="font-bold text-xl text-aat-blue tracking-tight hidden sm:block">Relawan<span class="text-aat-yellow">AAT</span></span>
+                    </a>
+                </div>
+                    <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">

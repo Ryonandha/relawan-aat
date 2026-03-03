@@ -14,6 +14,14 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'aat-blue': '#003366',
+                'aat-blue-light': '#004c99',
+                'aat-yellow': '#FFCC00',
+                'aat-yellow-dark': '#e6b800',
+                'aat-gray': '#F8FAFC',
+                'aat-text': '#1F2937',
+            }
         },
     },
 

@@ -56,11 +56,15 @@ class EventController extends Controller
     }
     // Tambahkan di bagian atas controller
 public function adminIndex()
-{
-    // Admin Sekre hanya melihat kegiatan di sekrenya sendiri
-    $events = Event::where('secretariat_id', auth()->user()->secretariat_id)->get();
-    return view('admin.events.index', compact('events'));
-}
+    {
+        // Tambahkan withCount('registrations') untuk menghitung total peserta
+        $events = Event::withCount('registrations')
+                    ->where('secretariat_id', auth()->user()->secretariat_id)
+                    ->orderBy('event_date', 'desc')
+                    ->get();
+                    
+        return view('admin.events.index', compact('events'));
+    }
 
 public function create()
 {
