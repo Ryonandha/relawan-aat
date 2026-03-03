@@ -41,7 +41,7 @@ class User extends Authenticatable
 
     public function secretariat()
     {
-        return $this->belongsTo(Secretariat::class);
+        return $this->belongsTo(Secretariat::class, 'secretariat_id');
     }
 
     public function eventRegistrations()

@@ -25,12 +25,13 @@ class RoleAndUserSeeder extends Seeder
         $superAdmin->assignRole($roleSuperAdmin);
 
         // 3. Buat Akun Dummy Admin Sekre (Purwokerto)
-        $adminPurwokerto = User::create([
-            'name' => 'Admin Sekre Purwokerto',
-            'email' => 'purwokerto@aat.or.id',
-            'password' => Hash::make('password123'),
+        $adminSekre = User::create([
+            'name' => 'Admin Purwokerto',
+            'email' => 'admin@gmail.com', // Sesuaikan email adminmu
+            'password' => bcrypt('password'),
+            'secretariat_id' => 1, // <- Pastikan baris ini ditambahkan!
         ]);
-        $adminPurwokerto->assignRole($roleAdminSekre);
+        $adminSekre->assignRole('Admin Sekre');
 
         // 4. Buat Akun Dummy Relawan
         $relawan = User::create([
