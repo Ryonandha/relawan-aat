@@ -3,20 +3,19 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SecretariatController;
 use App\Models\Event;
 use App\Models\Secretariat;
 use App\Models\User;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\SecretariatController; // Tambahkan ini agar lebih rapi
 
 Route::get('/', function () {
-    // Mengambil 3 kegiatan terdekat yang belum lewat tanggalnya
+    // Menampilkan 3 kegiatan terdekat
     $latestEvents = Event::with('secretariat')
                          ->whereDate('event_date', '>=', now())
                          ->orderBy('event_date', 'asc')
                          ->take(3)
                          ->get();
-
     return view('welcome', compact('latestEvents'));
 });
 
@@ -24,19 +23,16 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
 
     if ($user->hasRole('Super Admin Pusat')) {
-        // Jika Pusat: Hitung SELURUH data nasional
         $totalRelawan = User::role('Relawan')->count();
         $totalSekre = Secretariat::count();
         $totalKegiatan = Event::count();
         $labelStat = "Nasional (Seluruh Regional)";
     } elseif ($user->hasRole('Admin Sekre')) {
-        // Jika Sekre: Hitung HANYA data di regionalnya sendiri
         $totalRelawan = User::role('Relawan')->where('secretariat_id', $user->secretariat_id)->count();
-        $totalSekre = 1; // Karena dia hanya memegang 1 sekre
+        $totalSekre = 1;
         $totalKegiatan = Event::where('secretariat_id', $user->secretariat_id)->count();
         $labelStat = "Regional " . ($user->secretariat->name ?? '');
     } else {
-        // Relawan biasa tidak melihat statistik ini
         $totalRelawan = 0; $totalSekre = 0; $totalKegiatan = 0;
         $labelStat = "";
     }
@@ -44,10 +40,9 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('totalRelawan', 'totalSekre', 'totalKegiatan', 'labelStat'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// KELOMPOK RUTE YANG WAJIB LOGIN
+// KELOMPOK YANG WAJIB LOGIN
 Route::middleware('auth')->group(function () {
-    
-    // --- 1. RUTE UMUM & RELAWAN ---
+    // Sisi Relawan & Profil
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -56,7 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/riwayat-kegiatan', [EventController::class, 'history'])->name('events.history');
     Route::get('/sertifikat/download/{registration}', [EventController::class, 'downloadCertificate'])->name('certificate.download');
 
-    // --- 2. RUTE BERSAMA (ADMIN SEKRE & SUPER ADMIN PUSAT) ---
+    // RUTE BERSAMA: Admin Sekre & Pusat
     Route::middleware(['role:Admin Sekre|Super Admin Pusat'])->group(function () {
         // Manajemen Kegiatan
         Route::get('/admin/events', [EventController::class, 'adminIndex'])->name('admin.events.index');
@@ -68,19 +63,19 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
         Route::delete('/admin/events/{event}', [EventController::class, 'destroy'])->name('admin.events.destroy');
 
-        // Manajemen Pengguna (Lihat, Edit, & Hapus) -> PINDAHKAN EDIT & UPDATE KE SINI
+        // Manajemen Pengguna (Lihat, Edit, Hapus)
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
         Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
         Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
     });
 
-    // --- 3. RUTE KHUSUS (HANYA SUPER ADMIN PUSAT) ---
+    // RUTE KHUSUS: Hanya Super Admin Pusat
     Route::middleware(['role:Super Admin Pusat'])->group(function () {
-        // Manajemen Pengguna (Hanya Pusat yang bisa TAMBAH admin baru)
+        // Tambah Pengguna Baru
         Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
         Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
-
+        
         // Manajemen Regional (Sekretariat)
         Route::get('/admin/secretariats', [SecretariatController::class, 'index'])->name('admin.secretariats.index');
         Route::post('/admin/secretariats', [SecretariatController::class, 'store'])->name('admin.secretariats.store');

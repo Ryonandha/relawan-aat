@@ -4,11 +4,11 @@
             <h2 class="font-semibold text-xl text-aat-blue leading-tight">
                 {{ __('Data Pengguna: ') }} <span class="text-aat-yellow">{{ $namaRegional ?? 'Wilayah' }}</span>
             </h2>
-            @role('Super Admin Pusat')
+            @if(auth()->user()->hasRole('Super Admin Pusat'))
             <a href="{{ route('admin.users.create') }}" class="bg-aat-blue hover:bg-aat-blue-light text-white font-bold py-2 px-6 rounded-full shadow-md transition">
                 + Tambah Admin Sekre
             </a>
-            @endrole
+            @endif
         </div>
     </x-slot>
 
@@ -26,7 +26,7 @@
                 </div>
             @endif
 
-            @role('Super Admin Pusat')
+            @if(auth()->user()->hasRole('Super Admin Pusat'))
             <div class="mb-8">
                 <h3 class="text-lg font-extrabold text-aat-blue mb-4 flex items-center gap-2">🛡️ Daftar Pengurus & Admin</h3>
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl border-t-4 border-aat-yellow p-6">
@@ -37,6 +37,7 @@
                                     <th class="p-3 border">Nama Lengkap</th>
                                     <th class="p-3 border">Email</th>
                                     <th class="p-3 border text-center">Regional</th>
+                                    <th class="p-3 border text-center">Peran</th>
                                     <th class="p-3 border text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -47,6 +48,9 @@
                                     <td class="p-3 border text-gray-600">{{ $admin->email }}</td>
                                     <td class="p-3 border text-center">
                                         <span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold">{{ $admin->secretariat->name ?? 'Pusat' }}</span>
+                                    </td>
+                                    <td class="p-3 border text-center">
+                                        <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold">{{ collect($admin->roles)->pluck('name')->first() }}</span>
                                     </td>
                                     <td class="p-3 border text-center">
                                         <div class="flex justify-center gap-2">
@@ -65,17 +69,17 @@
                     </div>
                 </div>
             </div>
-            @endrole
+            @endif
 
             <div>
                 <h3 class="text-lg font-extrabold text-aat-blue mb-4 flex items-center gap-2">🧑‍🤝‍🧑 Daftar Relawan</h3>
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl border-t-4 border-aat-blue p-6">
                     
-                    @if($relawans->isEmpty())
+                    @if(isset($relawans) && $relawans->isEmpty())
                         <div class="text-center py-8 text-gray-500">
                             <p class="text-lg font-bold">Belum ada relawan yang terdaftar di regional ini.</p>
                         </div>
-                    @else
+                    @elseif(isset($relawans))
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -83,6 +87,7 @@
                                         <th class="p-3 border">Nama Lengkap</th>
                                         <th class="p-3 border">Email / Kontak</th>
                                         <th class="p-3 border text-center">ID SIANAS</th>
+                                        <th class="p-3 border text-center">Regional</th>
                                         <th class="p-3 border text-center">Aksi</th>
                                     </tr>
                                 </thead>
@@ -95,13 +100,12 @@
                                             <span class="text-xs text-green-600 font-bold flex items-center gap-1 mt-1">📞 {{ $relawan->phone_number ?? '-' }}</span>
                                         </td>
                                         <td class="p-3 border text-center font-mono text-sm text-gray-600">{{ $relawan->sianas_id ?? 'Belum Ada' }}</td>
-                                        
+                                        <td class="p-3 border text-center">
+                                            <span class="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full font-bold">{{ $relawan->secretariat->name ?? '-' }}</span>
+                                        </td>
                                         <td class="p-3 border text-center">
                                             <div class="flex justify-center gap-2">
-                                                @role('Super Admin Pusat')
                                                 <a href="{{ route('admin.users.edit', $relawan->id) }}" class="text-sm bg-aat-yellow hover:bg-yellow-500 text-black px-3 py-1.5 rounded font-bold shadow-sm">Edit</a>
-                                                @endrole
-
                                                 <form action="{{ route('admin.users.destroy', $relawan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus RELAWAN ini? Data pendaftaran kegiatannya juga akan ikut terhapus.');">
                                                     @csrf
                                                     @method('DELETE')
