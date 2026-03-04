@@ -30,20 +30,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($admins as $admin)
+                        @foreach($users as $user)
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="p-3 border font-semibold text-gray-800">{{ $admin->name }}</td>
-                            <td class="p-3 border text-gray-600">{{ $admin->email }}</td>
+                            <td class="p-3 border font-semibold text-gray-800">{{ $user->name }}</td>
+                            <td class="p-3 border text-gray-600">{{ $user->email }}</td>
                             <td class="p-3 border text-center">
-                                @if($admin->secretariat)
-                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold">{{ $admin->secretariat->name }}</span>
-                                @else
-                                    <span class="text-gray-400 text-xs italic">Pusat / Super Admin</span>
-                                @endif
+                                <span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold">{{ $user->secretariat->name ?? 'Pusat' }}</span>
                             </td>
                             <td class="p-3 border text-center">
-                                <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold">{{ $admin->roles->pluck('name')->first() }}</span>
+                                <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold">{{ $user->roles->pluck('name')->first() }}</span>
                             </td>
+                            
+                            @role('Super Admin Pusat')
+                            <td class="p-3 border text-center">
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="text-sm bg-aat-yellow hover:bg-yellow-500 text-black px-3 py-1 rounded font-bold">Edit</a>
+                            </td>
+                            @endrole
                         </tr>
                         @endforeach
                     </tbody>

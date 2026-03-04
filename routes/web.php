@@ -43,12 +43,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/events', [EventController::class, 'store'])->name('admin.events.store');
         Route::get('/admin/events/{event}/participants', [EventController::class, 'participants'])->name('admin.events.participants');
         Route::post('/admin/registrations/{registration}/check-in', [EventController::class, 'checkIn'])->name('admin.events.checkin');
+        Route::get('/admin/events/{event}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
+        Route::put('/admin/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
+        Route::delete('/admin/events/{event}', [EventController::class, 'destroy'])->name('admin.events.destroy');
+        Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
     });
 
     Route::middleware(['auth', 'role:Super Admin Pusat'])->group(function () {
-    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
-    Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+        Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+        Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+        Route::get('/admin/secretariats', [App\Http\Controllers\SecretariatController::class, 'index'])->name('admin.secretariats.index');
+        Route::post('/admin/secretariats', [App\Http\Controllers\SecretariatController::class, 'store'])->name('admin.secretariats.store');
+        Route::delete('/admin/secretariats/{id}', [App\Http\Controllers\SecretariatController::class, 'destroy'])->name('admin.secretariats.destroy');
+        Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
     Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+    Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
 });
 });
 

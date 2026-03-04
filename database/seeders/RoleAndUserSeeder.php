@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Secretariat; // <- Tambahkan Model Secretariat
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,6 +12,11 @@ class RoleAndUserSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Buat Data Secretariat Dummy Terlebih Dahulu
+        $sekrePurwokerto = Secretariat::create([
+            'name' => 'Purwokerto',
+        ]);
+
         // 1. Buat Role
         $roleSuperAdmin = Role::create(['name' => 'Super Admin Pusat']);
         $roleAdminSekre = Role::create(['name' => 'Admin Sekre']);
@@ -27,18 +33,18 @@ class RoleAndUserSeeder extends Seeder
         // 3. Buat Akun Dummy Admin Sekre (Purwokerto)
         $adminSekre = User::create([
             'name' => 'Admin Purwokerto',
-            'email' => 'admin@gmail.com', // Sesuaikan email adminmu
+            'email' => 'purwokerto@gmail.com', 
             'password' => bcrypt('password'),
-            'secretariat_id' => 1, // <- Pastikan baris ini ditambahkan!
+            'secretariat_id' => $sekrePurwokerto->id, // <- Ambil ID otomatis dari sekre yang baru dibuat di atas
         ]);
-        $adminSekre->assignRole('Admin Sekre');
+        $adminSekre->assignRole($roleAdminSekre);
 
         // 4. Buat Akun Dummy Relawan
         $relawan = User::create([
             'name' => 'Relawan Dummy',
             'email' => 'relawan@gmail.com',
             'password' => Hash::make('password123'),
-            'sianas_id' => 'SIA-12345' // Contoh integrasi ID SIANAS nantinya
+            'sianas_id' => 'SIA-12345'
         ]);
         $relawan->assignRole($roleRelawan);
     }

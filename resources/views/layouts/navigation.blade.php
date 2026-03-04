@@ -31,9 +31,15 @@
     </x-nav-link>
     @endrole
 
-    @role('Super Admin Pusat')
+    @hasanyrole('Super Admin Pusat|Admin Sekre')
     <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-        {{ __('Manajemen Pengguna') }}
+        {{ __('Data Pengguna') }}
+    </x-nav-link>
+    @endhasanyrole
+
+    @role('Super Admin Pusat')
+    <x-nav-link :href="route('admin.secretariats.index')" :active="request()->routeIs('admin.secretariats.*')">
+        {{ __('Manajemen Regional') }}
     </x-nav-link>
     @endrole
 
