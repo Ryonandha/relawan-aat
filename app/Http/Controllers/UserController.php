@@ -13,22 +13,36 @@ class UserController extends Controller
     // Menampilkan daftar pengguna (Pusat lihat semua, Sekre lihat relawan kotanya)
     public function index()
     {
-        if (auth()->user()->hasRole('Super Admin Pusat')) {
-            $users = User::with(['secretariat', 'roles'])
+        $user = auth()->user();
+
+        if ($user->hasRole('Super Admin Pusat')) {
+            // Pusat: Tarik admin dan relawan dari SELURUH wilayah
+            $admins = User::with(['secretariat', 'roles'])
                         ->whereHas('roles', function($q) {
-                            $q->whereIn('name', ['Admin Sekre', 'Relawan']);
+                            $q->whereIn('name', ['Admin Sekre', 'Super Admin Pusat']);
                         })->get();
-            $namaRegional = 'Semua Wilayah (Pusat)';
+
+            $relawans = User::with(['secretariat', 'roles'])
+                        ->whereHas('roles', function($q) {
+                            $q->where('name', 'Relawan');
+                        })->get();
+                        
+            $namaRegional = 'Semua Wilayah (Nasional)';
         } else {
-            $users = User::with(['secretariat', 'roles'])
-                        ->where('secretariat_id', auth()->user()->secretariat_id)
+            // Sekre: HANYA menarik relawan dari wilayahnya (Admin Sekre tidak perlu melihat admin lain)
+            $admins = collect(); // Kosongkan tabel admin untuk Admin Sekre
+            
+            $relawans = User::with(['secretariat', 'roles'])
+                        ->where('secretariat_id', $user->secretariat_id)
                         ->whereHas('roles', function($q) {
-                            $q->where('name', 'Relawan'); // Sekre hanya lihat Relawan
+                            $q->where('name', 'Relawan');
                         })->get();
-            $namaRegional = auth()->user()->secretariat->name ?? 'Wilayah';
+                        
+            $namaRegional = $user->secretariat->name ?? 'Wilayah Tidak Diketahui';
         }
 
-        return view('admin.users.index', compact('users', 'namaRegional'));
+        // Kirim variabel $admins dan $relawans secara terpisah ke tampilan
+        return view('admin.users.index', compact('admins', 'relawans', 'namaRegional'));
     }
 
     // Hanya Pusat yang bisa akses fungsi create dan store (sudah ada sebelumnya)

@@ -20,12 +20,27 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    // Menghitung data dari database
-    $totalRelawan = User::role('Relawan')->count(); // Hanya hitung yang rolenya Relawan
-    $totalSekre = Secretariat::count();
-    $totalKegiatan = Event::count();
+    $user = auth()->user();
 
-    return view('dashboard', compact('totalRelawan', 'totalSekre', 'totalKegiatan'));
+    if ($user->hasRole('Super Admin Pusat')) {
+        // Jika Pusat: Hitung SELURUH data nasional
+        $totalRelawan = \App\Models\User::role('Relawan')->count();
+        $totalSekre = \App\Models\Secretariat::count();
+        $totalKegiatan = \App\Models\Event::count();
+        $labelStat = "Nasional (Seluruh Regional)";
+    } elseif ($user->hasRole('Admin Sekre')) {
+        // Jika Sekre: Hitung HANYA data di regionalnya sendiri
+        $totalRelawan = \App\Models\User::role('Relawan')->where('secretariat_id', $user->secretariat_id)->count();
+        $totalSekre = 1; // Karena dia hanya memegang 1 sekre
+        $totalKegiatan = \App\Models\Event::where('secretariat_id', $user->secretariat_id)->count();
+        $labelStat = "Regional " . ($user->secretariat->name ?? '');
+    } else {
+        // Relawan biasa tidak melihat statistik ini
+        $totalRelawan = 0; $totalSekre = 0; $totalKegiatan = 0;
+        $labelStat = "";
+    }
+
+    return view('dashboard', compact('totalRelawan', 'totalSekre', 'totalKegiatan', 'labelStat'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -57,10 +72,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/secretariats', [App\Http\Controllers\SecretariatController::class, 'store'])->name('admin.secretariats.store');
         Route::delete('/admin/secretariats/{id}', [App\Http\Controllers\SecretariatController::class, 'destroy'])->name('admin.secretariats.destroy');
         Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
-    Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
-    Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-    Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
-});
+        Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+        Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+    });
 });
 
 require __DIR__.'/auth.php';
