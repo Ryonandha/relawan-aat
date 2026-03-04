@@ -65,9 +65,20 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($latestEvents as $event)
-                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition transform hover:-translate-y-1">
-                            <div class="h-2 bg-aat-yellow w-full"></div>
-                            <div class="p-6">
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition transform hover:-translate-y-1 flex flex-col">
+                            
+                            @if($event->cover_image)
+                                <img src="{{ asset('storage/' . $event->cover_image) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
+                            @else
+                                <div class="h-48 bg-aat-blue flex flex-col items-center justify-center text-aat-yellow opacity-90 relative overflow-hidden">
+                                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                                    <span class="font-extrabold text-4xl relative z-10">AAT</span>
+                                    <span class="text-white text-sm mt-2 relative z-10">Relawan Mengajar</span>
+                                </div>
+                            @endif
+                            <div class="h-1 bg-aat-yellow w-full"></div>
+
+                            <div class="p-6 flex-grow">
                                 <div class="text-sm text-aat-blue font-semibold mb-2 flex items-center gap-2">
                                     📍 {{ $event->secretariat->name ?? 'Pusat' }}
                                 </div>
@@ -79,7 +90,8 @@
                                     <span>⏰ {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }}</span>
                                 </div>
                             </div>
-                            <div class="bg-aat-gray px-6 py-4">
+                            
+                            <div class="bg-aat-gray px-6 py-4 mt-auto">
                                 <a href="{{ route('login') }}" class="block text-center w-full bg-aat-blue hover:bg-aat-blue-light text-white font-bold py-2 px-4 rounded transition">
                                     Ikut Serta
                                 </a>
