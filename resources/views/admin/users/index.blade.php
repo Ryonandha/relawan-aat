@@ -20,7 +20,6 @@
                     {{ session('success') }}
                 </div>
             @endif
-
             @if(session('error'))
                 <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm mb-6 font-bold">
                     {{ session('error') }}
@@ -38,7 +37,6 @@
                                     <th class="p-3 border">Nama Lengkap</th>
                                     <th class="p-3 border">Email</th>
                                     <th class="p-3 border text-center">Regional</th>
-                                    <th class="p-3 border text-center">Peran</th>
                                     <th class="p-3 border text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -49,9 +47,6 @@
                                     <td class="p-3 border text-gray-600">{{ $admin->email }}</td>
                                     <td class="p-3 border text-center">
                                         <span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold">{{ $admin->secretariat->name ?? 'Pusat' }}</span>
-                                    </td>
-                                    <td class="p-3 border text-center">
-                                        <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold">{{ $admin->roles->pluck('name')->first() }}</span>
                                     </td>
                                     <td class="p-3 border text-center">
                                         <div class="flex justify-center gap-2">
@@ -88,11 +83,7 @@
                                         <th class="p-3 border">Nama Lengkap</th>
                                         <th class="p-3 border">Email / Kontak</th>
                                         <th class="p-3 border text-center">ID SIANAS</th>
-                                        <th class="p-3 border text-center">Regional</th>
-                                        
-                                        @hasanyrole('Super Admin Pusat|Admin Sekre')
                                         <th class="p-3 border text-center">Aksi</th>
-                                        @endhasanyrole
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -104,11 +95,7 @@
                                             <span class="text-xs text-green-600 font-bold flex items-center gap-1 mt-1">📞 {{ $relawan->phone_number ?? '-' }}</span>
                                         </td>
                                         <td class="p-3 border text-center font-mono text-sm text-gray-600">{{ $relawan->sianas_id ?? 'Belum Ada' }}</td>
-                                        <td class="p-3 border text-center">
-                                            <span class="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full font-bold">{{ $relawan->secretariat->name ?? '-' }}</span>
-                                        </td>
                                         
-                                        @hasanyrole('Super Admin Pusat|Admin Sekre')
                                         <td class="p-3 border text-center">
                                             <div class="flex justify-center gap-2">
                                                 @role('Super Admin Pusat')
@@ -122,7 +109,6 @@
                                                 </form>
                                             </div>
                                         </td>
-                                        @endhasanyrole
                                     </tr>
                                     @endforeach
                                 </tbody>

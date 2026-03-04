@@ -68,18 +68,18 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
         Route::delete('/admin/events/{event}', [EventController::class, 'destroy'])->name('admin.events.destroy');
 
-        // Manajemen Pengguna Dasar (Lihat Daftar & Hapus Relawan)
+        // Manajemen Pengguna (Lihat, Edit, & Hapus) -> PINDAHKAN EDIT & UPDATE KE SINI
         Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
     });
 
     // --- 3. RUTE KHUSUS (HANYA SUPER ADMIN PUSAT) ---
     Route::middleware(['role:Super Admin Pusat'])->group(function () {
-        // Sisa Manajemen Pengguna (Tambah & Edit Admin)
+        // Manajemen Pengguna (Hanya Pusat yang bisa TAMBAH admin baru)
         Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
         Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
-        Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
-        Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
 
         // Manajemen Regional (Sekretariat)
         Route::get('/admin/secretariats', [SecretariatController::class, 'index'])->name('admin.secretariats.index');
