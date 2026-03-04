@@ -16,8 +16,14 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             @if(session('success'))
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm mb-6">
+                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm mb-6 font-bold">
                     {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm mb-6 font-bold">
+                    {{ session('error') }}
                 </div>
             @endif
 
@@ -48,7 +54,14 @@
                                         <span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold">{{ $admin->roles->pluck('name')->first() }}</span>
                                     </td>
                                     <td class="p-3 border text-center">
-                                        <a href="{{ route('admin.users.edit', $admin->id) }}" class="text-sm bg-aat-yellow hover:bg-yellow-500 text-black px-3 py-1 rounded font-bold shadow-sm">Edit</a>
+                                        <div class="flex justify-center gap-2">
+                                            <a href="{{ route('admin.users.edit', $admin->id) }}" class="text-sm bg-aat-yellow hover:bg-yellow-500 text-black px-3 py-1.5 rounded font-bold shadow-sm">Edit</a>
+                                            <form action="{{ route('admin.users.destroy', $admin->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun ADMIN ini secara permanen?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded font-bold shadow-sm">Hapus</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -76,9 +89,10 @@
                                         <th class="p-3 border">Email / Kontak</th>
                                         <th class="p-3 border text-center">ID SIANAS</th>
                                         <th class="p-3 border text-center">Regional</th>
-                                        @role('Super Admin Pusat')
+                                        
+                                        @hasanyrole('Super Admin Pusat|Admin Sekre')
                                         <th class="p-3 border text-center">Aksi</th>
-                                        @endrole
+                                        @endhasanyrole
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -93,11 +107,22 @@
                                         <td class="p-3 border text-center">
                                             <span class="bg-gray-100 text-gray-800 text-xs px-3 py-1 rounded-full font-bold">{{ $relawan->secretariat->name ?? '-' }}</span>
                                         </td>
-                                        @role('Super Admin Pusat')
+                                        
+                                        @hasanyrole('Super Admin Pusat|Admin Sekre')
                                         <td class="p-3 border text-center">
-                                            <a href="{{ route('admin.users.edit', $relawan->id) }}" class="text-sm bg-aat-yellow hover:bg-yellow-500 text-black px-3 py-1 rounded font-bold shadow-sm">Edit</a>
+                                            <div class="flex justify-center gap-2">
+                                                @role('Super Admin Pusat')
+                                                <a href="{{ route('admin.users.edit', $relawan->id) }}" class="text-sm bg-aat-yellow hover:bg-yellow-500 text-black px-3 py-1.5 rounded font-bold shadow-sm">Edit</a>
+                                                @endrole
+
+                                                <form action="{{ route('admin.users.destroy', $relawan->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus RELAWAN ini? Data pendaftaran kegiatannya juga akan ikut terhapus.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1.5 rounded font-bold shadow-sm">Hapus</button>
+                                                </form>
+                                            </div>
                                         </td>
-                                        @endrole
+                                        @endhasanyrole
                                     </tr>
                                     @endforeach
                                 </tbody>

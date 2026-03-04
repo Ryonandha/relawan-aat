@@ -89,4 +89,32 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui!');
     }
+    // --- TAMBAHAN BARU: FITUR HAPUS ---
+    public function destroy(User $user)
+    {
+        $currentUser = auth()->user();
+
+        // 1. Pengaman: Jangan biarkan admin menghapus akunnya sendiri
+        if ($currentUser->id === $user->id) {
+            return redirect()->back()->with('error', 'Gagal! Anda tidak dapat menghapus akun yang sedang Anda pakai.');
+        }
+
+        // 2. Jika yang menghapus adalah Super Admin Pusat
+        if ($currentUser->hasRole('Super Admin Pusat')) {
+            $user->delete();
+            return redirect()->route('admin.users.index')->with('success', 'Akun pengguna berhasil dihapus secara permanen!');
+        }
+
+        // 3. Jika yang menghapus adalah Admin Sekre
+        if ($currentUser->hasRole('Admin Sekre')) {
+            // Pastikan yang dihapus BUKAN sesama admin, dan HARUS berada di regional yang sama
+            if ($user->hasRole('Relawan') && $user->secretariat_id == $currentUser->secretariat_id) {
+                $user->delete();
+                return redirect()->route('admin.users.index')->with('success', 'Akun relawan berhasil dihapus!');
+            }
+        }
+
+        // Jika tidak memenuhi syarat di atas, tolak aksesnya
+        abort(403, 'Anda tidak memiliki izin untuk menghapus pengguna ini.');
+    }
 }
