@@ -31,6 +31,12 @@
     </x-nav-link>
     @endrole
 
+    @role('Super Admin Pusat')
+    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
+        {{ __('Manajemen Pengguna') }}
+    </x-nav-link>
+    @endrole
+
     @role('Relawan')
     <x-nav-link :href="route('events.index')" :active="request()->routeIs('events.index')">
         {{ __('Cari Kegiatan') }}

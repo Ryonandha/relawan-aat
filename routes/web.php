@@ -6,6 +6,7 @@ use App\Http\Controllers\EventController;
 use App\Models\Event;
 use App\Models\Secretariat;
 use App\Models\User;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     // Mengambil 3 kegiatan terdekat yang belum lewat tanggalnya
@@ -43,6 +44,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/events/{event}/participants', [EventController::class, 'participants'])->name('admin.events.participants');
         Route::post('/admin/registrations/{registration}/check-in', [EventController::class, 'checkIn'])->name('admin.events.checkin');
     });
+
+    Route::middleware(['auth', 'role:Super Admin Pusat'])->group(function () {
+    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users/create', [UserController::class, 'create'])->name('admin.users.create');
+    Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+});
 });
 
 require __DIR__.'/auth.php';
