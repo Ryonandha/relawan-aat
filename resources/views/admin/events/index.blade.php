@@ -47,11 +47,20 @@
                                     </div>
                                     <div class="flex gap-2">
                                         <a href="{{ route('admin.events.participants', $event->id) }}" class="flex-1 text-center bg-aat-yellow hover:bg-yellow-500 text-aat-text py-2 rounded font-bold shadow-sm transition text-sm">
-                                            👥 Lihat Peserta
+                                            👥 Peserta
                                         </a>
-                                        <a href="#" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded font-bold shadow-sm transition text-sm">
+                                        
+                                        <a href="{{ route('admin.events.edit', $event->id) }}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded font-bold shadow-sm transition text-sm flex items-center justify-center" title="Edit">
                                             ✏️
                                         </a>
+
+                                        <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kegiatan ini secara permanen?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded font-bold shadow-sm transition text-sm flex items-center justify-center" title="Hapus">
+                                                🗑️
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>

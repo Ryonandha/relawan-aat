@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barrier;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
@@ -173,4 +174,65 @@ public function downloadCertificate(EventRegistration $registration)
     // 5. Download file
     return $pdf->download('Sertifikat_' . $registration->event->title . '.pdf');
 }
+// Menampilkan halaman Edit Kegiatan
+    public function edit($id)
+    {
+        $event = Event::findOrFail($id);
+
+        // Keamanan: Pastikan admin hanya bisa edit kegiatan di sekrenya sendiri (kecuali Pusat)
+        if (!auth()->user()->hasRole('Super Admin Pusat') && $event->secretariat_id != auth()->user()->secretariat_id) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit kegiatan ini.');
+        }
+
+        return view('admin.events.edit', compact('event'));
+    }
+
+    // Memproses Perubahan (Update)
+    public function update(Request $request, $id)
+    {
+        $event = Event::findOrFail($id);
+        
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'event_date' => 'required|date',
+            'quota' => 'required|integer|min:1',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $event->title = $request->title;
+        $event->description = $request->description;
+        $event->event_date = $request->event_date;
+        $event->start_time = $request->start_time;
+        $event->end_time = $request->end_time;
+        $event->quota = $request->quota;
+
+        // Jika admin mengunggah foto cover baru
+        if ($request->hasFile('cover_image')) {
+            // Hapus foto lama dari folder storage
+            if ($event->cover_image) {
+                Storage::disk('public')->delete($event->cover_image);
+            }
+            // Simpan foto baru
+            $event->cover_image = $request->file('cover_image')->store('event_covers', 'public');
+        }
+
+        $event->save();
+
+        return redirect()->route('admin.events.index')->with('success', 'Data kegiatan berhasil diperbarui!');
+    }
+
+    // Memproses Hapus Kegiatan
+    public function destroy($id)
+    {
+        $event = Event::findOrFail($id);
+        
+        // Hapus foto cover dari folder storage jika ada
+        if ($event->cover_image) {
+            Storage::disk('public')->delete($event->cover_image);
+        }
+        
+        $event->delete();
+
+        return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil dihapus!');
+    }
 }
