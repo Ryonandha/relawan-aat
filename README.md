@@ -1,59 +1,95 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌟 Sistem Informasi Manajemen Relawan - Yayasan Anak-Anak Terang (AAT)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi berbasis web ini dibangun untuk mempermudah pengelolaan relawan, penjadwalan kegiatan pendampingan, hingga penerbitan sertifikat digital secara otomatis bagi Yayasan Anak-Anak Terang (AAT) Indonesia.
 
-## About Laravel
+## 🚀 Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Sistem Autentikasi & Multi-Role:** Menggunakan Laravel Breeze & Spatie Permission. Terdapat 3 tingkat hak akses:
+  - **Super Admin Pusat:** Mengelola seluruh data kegiatan dari semua regional dan memiliki akses penuh untuk mendaftarkan akun Admin Sekre/Regional baru.
+  - **Admin Sekre (Regional):** Mengelola kegiatan (Membuat, Melihat, Menambahkan Poster Kegiatan), mengelola daftar peserta, dan melakukan presensi khusus di wilayah domisilinya.
+  - **Relawan:** Mendaftar kegiatan sesuai regionalnya, mengelola profil (termasuk update domisili sekre), dan mengunduh sertifikat.
+- **Filter Regional Dinamis:** Sistem secara cerdas memfilter tampilan kegiatan. Relawan dan Admin hanya akan melihat data kegiatan yang relevan dengan domisili/sekretariat mereka.
+- **Manajemen Kegiatan & Presensi:** Admin dapat membuat acara baru lengkap dengan fitur *upload* poster/cover kegiatan, melihat daftar pendaftar, dan menandai kehadiran (*check-in*) peserta pada hari-H.
+- **Dashboard Statistik:** Menampilkan ringkasan data secara *real-time* seperti Total Relawan, Total Sekre Aktif, dan Total Kegiatan.
+- **Sertifikat Digital Otomatis (PDF):** Relawan yang ditandai "Hadir" oleh Admin dapat langsung mengunduh sertifikat PDF yang di-*generate* secara otomatis menggunakan `laravel-dompdf`.
+- **UI/UX Modern & Responsif:** Desain antarmuka dikustomisasi menggunakan Tailwind CSS dengan mengusung identitas warna khas AAT (Biru Navy & Kuning Emas).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Teknologi yang Digunakan
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Framework:** Laravel 12
+- **Frontend:** Tailwind CSS, Alpine.js, Blade Templates
+- **Database:** MySQL
+- **Library Tambahan:**
+  - `spatie/laravel-permission` (Manajemen Hak Akses & Peran)
+  - `barryvdh/laravel-dompdf` (Generator Sertifikat PDF)
 
-## Learning Laravel
+## 📦 Panduan Instalasi (Environment Development)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*localhost*) atau *server* pengujian:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone Repositori:**
+   ```bash
+   git clone [https://github.com/USERNAME_ANDA/relawan-aat.git](https://github.com/USERNAME_ANDA/relawan-aat.git)
+   cd relawan-aat
 
-## Laravel Sponsors
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install Dependensi Backend & Frontend:**
+Pastikan Anda sudah menginstal PHP, Composer, dan Node.js di komputer Anda.
+```bash
+composer install
+npm install
 
-### Premium Partners
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. **Konfigurasi Environment:**
+Salin file pengaturan bawaan menjadi file `.env` aktif, lalu sesuaikan kredensial database Anda (Nama database, *username*, dan *password*).
+```bash
+cp .env.example .env
+php artisan key:generate
 
-## Contributing
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Link Folder Storage (Penting untuk Upload Foto):**
+Agar file gambar/poster yang diunggah dapat diakses secara publik.
+```bash
+php artisan storage:link
 
-## Code of Conduct
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Migrasi dan Inisialisasi Data (Seeder):**
+Jalankan perintah ini untuk membangun tabel *database* dan menyuntikkan akun *dummy* (Super Admin & Admin Sekre) ke dalam sistem.
+```bash
+php artisan migrate --seed
 
-## Security Vulnerabilities
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Jalankan Aplikasi:**
+Buka dua terminal (*command prompt*) dan jalankan kedua perintah ini secara bersamaan:
+```bash
+php artisan serve
 
-## License
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+npm run dev
+
+```
+
+Aplikasi sekarang dapat diakses melalui browser di: `http://localhost:8000`
+
+## 🔐 Akun Default (Untuk Testing)
+
+Gunakan kredensial berikut untuk menguji sistem pertama kali:
+
+* **Super Admin Pusat:**
+* Email: `superadmin@aat.or.id` (atau `superadmin@gmail.com` bergantung pada konfigurasi seeder Anda)
+* Password: `password`
+
+
+* **Admin Sekre (Contoh: Purwokerto):**
+* Email: `purwokerto@aat.or.id` (atau `admin@gmail.com`)
+* Password: `password`
+
+
+* **Relawan:** Silakan daftar secara langsung (buat akun baru) melalui menu **Register** di halaman utama website.
