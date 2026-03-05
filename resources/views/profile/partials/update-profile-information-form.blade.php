@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Perbarui informasi nama profil dan alamat email akun Anda.") }}
+            {{ __("Perbarui informasi nama profil, alamat email, dan nomor telepon akun Anda.") }}
         </p>
     </header>
 
@@ -27,6 +27,12 @@
             <x-input-label for="sianas_id" :value="__('ID SIANAS / Nomor Anggota')" />
             <x-text-input id="sianas_id" type="text" class="mt-1 block w-full bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed" :value="$user->sianas_id ?? 'Belum memiliki ID SIANAS'" readonly disabled />
             <p class="text-xs text-gray-500 mt-1">*ID SIANAS resmi hanya dapat diisi atau diubah oleh Pengurus Pusat.</p>
+        </div>
+
+        <div>
+            <x-input-label for="phone_number" :value="__('Nomor Telepon / WhatsApp')" />
+            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->phone_number)" placeholder="Contoh: 081234567890" />
+            <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
         </div>
 
         <div>

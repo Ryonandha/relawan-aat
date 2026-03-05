@@ -8,25 +8,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use App\Models\Secretariat; // Tambahkan di atas
 
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Menampilkan halaman profil.
      */
     public function edit(Request $request): View
     {
-        $secretariats = Secretariat::all(); // Ambil data sekre
-
         return view('profile.edit', [
             'user' => $request->user(),
-            'secretariats' => $secretariats, // Kirim ke view
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Menyimpan perubahan profil.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -42,7 +38,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Menghapus akun pengguna.
      */
     public function destroy(Request $request): RedirectResponse
     {

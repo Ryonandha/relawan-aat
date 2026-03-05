@@ -29,6 +29,12 @@
                     </div>
 
                     <div class="mb-5">
+                        <x-input-label for="phone_number" :value="__('Nomor WhatsApp')" class="font-bold text-gray-700 mb-1" />
+                        <x-text-input id="phone_number" class="block w-full border-gray-300 focus:border-aat-blue focus:ring-aat-blue rounded-md shadow-sm" type="text" name="phone_number" :value="old('phone_number', $user->phone_number)" placeholder="Contoh: 081234567890" />
+                        <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
+                    </div>
+
+                    <div class="mb-5">
                         <x-input-label for="secretariat_id" :value="__('Penempatan Regional')" class="font-bold text-gray-700 mb-1" />
                         <select id="secretariat_id" name="secretariat_id" class="block w-full border-gray-300 focus:border-aat-blue focus:ring-aat-blue rounded-md shadow-sm" required>
                             <option value="" disabled>-- Pilih Regional --</option>
