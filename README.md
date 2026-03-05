@@ -29,7 +29,7 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*l
 
 1. **Clone Repositori:**
    ```bash
-   git clone [https://github.com/USERNAME_ANDA/relawan-aat.git](https://github.com/USERNAME_ANDA/relawan-aat.git)
+   git clone https://github.com/Ryonandha/relawan-aat.git
    cd relawan-aat
 
 2. **Install Dependensi Backend & Frontend:**
@@ -80,13 +80,13 @@ Aplikasi sekarang dapat diakses melalui browser di: `http://localhost:8000`
 Gunakan kredensial berikut untuk menguji sistem pertama kali:
 
 * **Super Admin Pusat:**
-* Email: `superadmin@aat.or.id` (atau `superadmin@gmail.com` bergantung pada konfigurasi seeder Anda)
-* Password: `password`
+    * Email: `superadmin@aat.or.id` (atau `superadmin@gmail.com` bergantung pada konfigurasi seeder Anda)
+    * Password: `password`
 
 
 * **Admin Sekre (Contoh: Purwokerto):**
-* Email: `purwokerto@aat.or.id` (atau `admin@gmail.com`)
-* Password: `password`
+    * Email: `purwokerto@aat.or.id` (atau `admin@gmail.com`)
+    * Password: `password`
 
 
 * **Relawan:** Silakan daftar secara langsung (buat akun baru) melalui menu **Register** di halaman utama website.
