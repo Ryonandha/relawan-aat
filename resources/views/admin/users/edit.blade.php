@@ -14,7 +14,9 @@
                 
                 <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
                     @csrf
-                    @method('PUT') <div class="mb-5">
+                    @method('PUT')
+
+                    <div class="mb-5">
                         <x-input-label for="name" :value="__('Nama Lengkap')" class="font-bold text-gray-700 mb-1" />
                         <x-text-input id="name" class="block w-full border-gray-300 focus:border-aat-blue focus:ring-aat-blue rounded-md shadow-sm" type="text" name="name" :value="old('name', $user->name)" required autofocus />
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
@@ -35,6 +37,18 @@
                             @endforeach
                         </select>
                         <x-input-error :messages="$errors->get('secretariat_id')" class="mt-2" />
+                    </div>
+
+                    <div class="mb-5">
+                        <x-input-label for="sianas_id" :value="__('ID SIANAS / Nomor Anggota')" class="font-bold text-gray-700 mb-1" />
+                        
+                        @if(auth()->user()->hasRole('Super Admin Pusat'))
+                            <x-text-input id="sianas_id" class="block w-full border-gray-300 focus:border-aat-blue focus:ring-aat-blue rounded-md shadow-sm" type="text" name="sianas_id" :value="old('sianas_id', $user->sianas_id)" placeholder="Contoh: SIA-12345" />
+                            <x-input-error :messages="$errors->get('sianas_id')" class="mt-2" />
+                        @else
+                            <x-text-input id="sianas_id" class="block w-full bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed rounded-md shadow-sm" type="text" name="sianas_id_readonly" :value="$user->sianas_id ?? 'Belum Ada'" readonly disabled />
+                            <p class="text-xs text-gray-500 mt-1">*Hanya Super Admin Pusat yang memiliki wewenang untuk mengisi atau mengubah ID ini.</p>
+                        @endif
                     </div>
 
                     <div class="mb-6 p-5 bg-gray-50 rounded-lg border border-gray-200">

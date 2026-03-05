@@ -10,7 +10,7 @@ use Illuminate\Validation\Rules;
 
 class UserController extends Controller
 {
-    // Menampilkan Tabel
+    // 1. Menampilkan Tabel Pengguna
     public function index()
     {
         $user = auth()->user();
@@ -24,7 +24,7 @@ class UserController extends Controller
             })->get();
             $namaRegional = 'Semua Wilayah (Nasional)';
         } else {
-            $admins = collect(); // Kosongkan tabel admin untuk Admin Sekre
+            $admins = collect(); 
             $relawans = User::with(['secretariat', 'roles'])
                 ->where('secretariat_id', $user->secretariat_id)
                 ->whereHas('roles', function($q) {
@@ -36,7 +36,7 @@ class UserController extends Controller
         return view('admin.users.index', compact('admins', 'relawans', 'namaRegional'));
     }
 
-    // Pusat Menambah Admin Sekre
+    // 2. Pusat Menambah Admin Sekre
     public function create() {
         $secretariats = Secretariat::all();
         return view('admin.users.create', compact('secretariats'));
@@ -61,11 +61,10 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Admin Sekre berhasil ditambahkan!');
     }
 
-    // Mengedit Pengguna
+    // 3. Menampilkan Form Edit Pengguna
     public function edit(User $user) {
         $currentUser = auth()->user();
 
-        // Jika Admin Sekre, tolak jika dia mencoba edit admin lain atau relawan di luar kotanya
         if ($currentUser->hasRole('Admin Sekre')) {
             if (!$user->hasRole('Relawan') || $user->secretariat_id != $currentUser->secretariat_id) {
                 abort(403, 'Akses Ditolak: Anda tidak memiliki izin untuk mengedit pengguna ini.');
@@ -76,31 +75,55 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user', 'secretariats'));
     }
 
+    // 4. Memproses Update Pengguna (Termasuk ID SIANAS)
     public function update(Request $request, User $user) {
         $currentUser = auth()->user();
 
+        // Keamanan: Admin Sekre hanya boleh edit relawan di kotanya
         if ($currentUser->hasRole('Admin Sekre')) {
             if (!$user->hasRole('Relawan') || $user->secretariat_id != $currentUser->secretariat_id) {
                 abort(403, 'Akses Ditolak: Anda tidak memiliki izin untuk mengedit pengguna ini.');
             }
         }
 
-        $request->validate([
+        // Aturan validasi dasar
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
             'secretariat_id' => 'required|exists:secretariats,id',
-        ]);
+        ];
 
-        $user->update(['name' => $request->name, 'email' => $request->email, 'secretariat_id' => $request->secretariat_id]);
+        // Tambah aturan sianas_id JIKA yang mengedit adalah Super Admin Pusat
+        if ($currentUser->hasRole('Super Admin Pusat')) {
+            $rules['sianas_id'] = 'nullable|string|max:255';
+        }
 
+        $request->validate($rules);
+
+        // Siapkan data yang akan diupdate
+        $dataToUpdate = [
+            'name' => $request->name, 
+            'email' => $request->email, 
+            'secretariat_id' => $request->secretariat_id
+        ];
+
+        // Masukkan ID SIANAS ke dalam update HANYA jika yang login adalah Pusat
+        if ($currentUser->hasRole('Super Admin Pusat') && $request->has('sianas_id')) {
+            $dataToUpdate['sianas_id'] = $request->sianas_id;
+        }
+
+        // Jalankan Update
+        $user->update($dataToUpdate);
+
+        // Update password jika diisi
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'Data berhasil diperbarui!');
+        return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui!');
     }
 
-    // Menghapus Pengguna
+    // 5. Menghapus Pengguna
     public function destroy(User $user)
     {
         $currentUser = auth()->user();

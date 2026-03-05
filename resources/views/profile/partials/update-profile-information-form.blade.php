@@ -1,11 +1,11 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">
-            {{ __('Profile Information') }}
+            {{ __('Informasi Profil') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            {{ __("Perbarui informasi nama profil dan alamat email akun Anda.") }}
         </p>
     </header>
 
@@ -18,9 +18,15 @@
         @method('patch')
 
         <div>
-            <x-input-label for="name" :value="__('Name')" />
+            <x-input-label for="name" :value="__('Nama Lengkap')" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)" required autofocus autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
+        </div>
+
+        <div>
+            <x-input-label for="sianas_id" :value="__('ID SIANAS / Nomor Anggota')" />
+            <x-text-input id="sianas_id" type="text" class="mt-1 block w-full bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed" :value="$user->sianas_id ?? 'Belum memiliki ID SIANAS'" readonly disabled />
+            <p class="text-xs text-gray-500 mt-1">*ID SIANAS resmi hanya dapat diisi atau diubah oleh Pengurus Pusat.</p>
         </div>
 
         <div>
@@ -31,50 +37,24 @@
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
                     <p class="text-sm mt-2 text-gray-800">
-                        {{ __('Your email address is unverified.') }}
+                        {{ __('Alamat email Anda belum diverifikasi.') }}
 
                         <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            {{ __('Click here to re-send the verification email.') }}
+                            {{ __('Klik di sini untuk mengirim ulang email verifikasi.') }}
                         </button>
                     </p>
 
                     @if (session('status') === 'verification-link-sent')
                         <p class="mt-2 font-medium text-sm text-green-600">
-                            {{ __('A new verification link has been sent to your email address.') }}
+                            {{ __('Tautan verifikasi baru telah dikirim ke alamat email Anda.') }}
                         </p>
                     @endif
                 </div>
             @endif
         </div>
-        <div>
-            <x-input-label for="phone_number" value="{{ __('Nomor WhatsApp') }}" />
-            <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->phone_number)" placeholder="Contoh: 08123456789" />
-            <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
-        </div>
 
-        <div>
-            <x-input-label for="institution" value="{{ __('Asal Sekolah / Universitas') }}" />
-            <x-text-input id="institution" name="institution" type="text" class="mt-1 block w-full" :value="old('institution', $user->institution)" placeholder="Contoh: Universitas Jenderal Soedirman" />
-            <x-input-error class="mt-2" :messages="$errors->get('institution')" />
-        </div>
-
-        <div>
-            @role('Relawan')
-        <div>
-            <x-input-label for="secretariat_id" value="{{ __('Regional (Sekre)') }}" />
-            <select id="secretariat_id" name="secretariat_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                @foreach($secretariats as $sekre)
-                    <option value="{{ $sekre->id }}" {{ old('secretariat_id', $user->secretariat_id) == $sekre->id ? 'selected' : '' }}>
-                        {{ $sekre->name }}
-                    </option>
-                @endforeach
-            </select>
-            <x-input-error class="mt-2" :messages="$errors->get('secretariat_id')" />
-        </div>
-        @endrole
-        </div>
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-primary-button class="bg-aat-blue hover:bg-blue-800">{{ __('Simpan Perubahan') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -83,7 +63,7 @@
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
                     class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
+                >{{ __('Tersimpan.') }}</p>
             @endif
         </div>
     </form>
