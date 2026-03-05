@@ -17,9 +17,7 @@
             
             <div class="mb-6 text-center">
                 <a href="/">
-                    <div class="w-20 h-20 mx-auto bg-aat-blue rounded-full flex items-center justify-center text-aat-yellow font-extrabold text-3xl shadow-lg border-4 border-white">
-                        AAT
-                    </div>
+                    <img src="{{ asset('storage/logo/logo-AAT.png') }}" alt="Logo Anak-Anak Terang" class="h-24 w-auto mx-auto drop-shadow-lg mb-2">
                 </a>
                 <h2 class="mt-4 text-2xl font-bold text-aat-blue">Portal Relawan AAT</h2>
                 <p class="text-gray-500 text-sm">Masuk untuk melanjutkan ke sistem</p>
@@ -29,7 +27,7 @@
                 {{ $slot }}
             </div>
 
-            <div class="mt-8 text-sm text-gray-500">
+            <div class="mt-8 text-sm text-gray-500 font-medium">
                 &copy; {{ date('Y') }} Yayasan Anak-Anak Terang
             </div>
         </div>
