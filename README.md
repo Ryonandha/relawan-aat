@@ -29,7 +29,7 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*l
 
 1. **Clone Repositori:**
    ```bash
-   git clone [https://github.com/USERNAME_ANDA/relawan-aat.git](https://github.com/USERNAME_ANDA/relawan-aat.git)
+   git clone https://github.com/Ryonandha/relawan-aat.git
    cd relawan-aat
 
 2. **Install Dependensi Backend & Frontend:**
