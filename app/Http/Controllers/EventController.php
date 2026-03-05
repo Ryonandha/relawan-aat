@@ -4,235 +4,238 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventRegistration;
+use App\Models\Secretariat;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Barrier;
+use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
 {
-    // Fungsi untuk menampilkan daftar kegiatan
-   public function index()
+    // --- SISI ADMIN ---
+
+    public function adminIndex()
     {
-        $userSekreId = auth()->user()->secretariat_id;
+        $user = auth()->user();
 
-        // Mengambil event yang HANYA milik sekre relawan tersebut
-        // dan mengurutkan berdasarkan tanggal terbaru
-        $events = Event::with('secretariat')
-                    ->where('secretariat_id', $userSekreId)
-                    ->orderBy('event_date', 'asc')
-                    ->get();
-
-        return view('events.index', compact('events'));
-    }
-    // Fungsi untuk memproses pendaftaran relawan
-    public function join(Event $event)
-    {
-        $userId = Auth::id(); // Mengambil ID relawan yang sedang login
-
-        // Cek apakah relawan sudah pernah mendaftar di kegiatan ini
-        $isRegistered = EventRegistration::where('user_id', $userId)
-                            ->where('event_id', $event->id)
-                            ->exists();
-
-        if ($isRegistered) {
-            return back()->with('error', 'Kamu sudah terdaftar di kegiatan ini!');
-        }
-
-        // Cek apakah kuota masih tersedia (opsional tapi penting)
-        $pendaftarSaatIni = EventRegistration::where('event_id', $event->id)->count();
-        if ($pendaftarSaatIni >= $event->quota) {
-            return back()->with('error', 'Maaf, kuota kegiatan ini sudah penuh.');
-        }
-
-        // Simpan ke tabel event_registrations
-        EventRegistration::create([
-            'user_id' => $userId,
-            'event_id' => $event->id,
-            'is_attended' => false, // Default belum hadir
-        ]);
-
-        return back()->with('success', 'Berhasil mendaftar kegiatan!');
-    }
-    // Tambahkan di bagian atas controller
-public function adminIndex()
-    {
-        // Mengecek apakah yang login adalah Super Admin Pusat
-        if (auth()->user()->hasRole('Super Admin Pusat')) {
-            // Pusat melihat SEMUA kegiatan dari semua sekre
-            $events = Event::with(['secretariat'])
-                        ->withCount('registrations')
-                        ->orderBy('event_date', 'desc')
-                        ->get();
-            
-            $namaRegional = 'Semua Regional (Pusat)';
+        if ($user->hasRole('Super Admin Pusat')) {
+            $events = Event::with('secretariat')->orderBy('event_date', 'desc')->get();
+            $namaRegional = 'Semua Wilayah (Nasional)'; // Tambahkan variabel ini
         } else {
-            // Admin Sekre HANYA melihat kegiatan di wilayahnya
-            $events = Event::withCount('registrations')
-                        ->where('secretariat_id', auth()->user()->secretariat_id)
-                        ->orderBy('event_date', 'desc')
-                        ->get();
-            
-            $namaRegional = auth()->user()->secretariat->name ?? 'Wilayah Tidak Diketahui';
+            $events = Event::with('secretariat')
+                ->where('secretariat_id', $user->secretariat_id)
+                ->orderBy('event_date', 'desc')
+                ->get();
+            // Ambil nama regional dari user sekre yang login
+            $namaRegional = $user->secretariat->name ?? 'Wilayah'; // Tambahkan variabel ini
         }
 
-        // Kirim data kegiatan dan nama regional ke tampilan
+        // Jangan lupa kirim $namaRegional ke dalam view
         return view('admin.events.index', compact('events', 'namaRegional'));
     }
 
-public function create()
-{
-    return view('admin.events.create');
-}
+    public function create()
+    {
+        $secretariats = Secretariat::all();
+        return view('admin.events.create', compact('secretariats'));
+    }
 
-public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'required|string',
             'event_date' => 'required|date',
+            'start_time' => 'required', // <- Wajib Diisi
+            'end_time' => 'required',   // <- Wajib Diisi
+            'location' => 'required|string|max:255',
             'quota' => 'required|integer|min:1',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maksimal 2MB
+            'secretariat_id' => 'required|exists:secretariats,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $imagePath = null;
+        $coverPath = null;
         if ($request->hasFile('cover_image')) {
-            // Simpan foto ke folder storage/app/public/event_covers
-            $imagePath = $request->file('cover_image')->store('event_covers', 'public');
+            $coverPath = $request->file('cover_image')->store('event_covers', 'public');
         }
 
         Event::create([
             'title' => $request->title,
             'description' => $request->description,
-            'cover_image' => $imagePath, // Masukkan path foto ke database
             'event_date' => $request->event_date,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
+            'start_time' => $request->start_time, // <- Simpan ke DB
+            'end_time' => $request->end_time,     // <- Simpan ke DB
+            'location' => $request->location,
             'quota' => $request->quota,
-            'secretariat_id' => auth()->user()->secretariat_id,
+            'secretariat_id' => $request->secretariat_id,
+            'cover_image' => $coverPath,
         ]);
 
         return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil dibuat!');
     }
-public function participants(Event $event)
-{
-    // Memastikan Admin hanya bisa melihat pendaftar di sekrenya sendiri
-    if (auth()->user()->role !== 'Super Admin Pusat' && $event->secretariat_id !== auth()->user()->secretariat_id) {
-        abort(403);
-    }
 
-    // Mengambil data pendaftar beserta data user-nya
-    $participants = EventRegistration::with('user')
-                    ->where('event_id', $event->id)
-                    ->get();
-
-    return view('admin.events.participants', compact('event', 'participants'));
-}
-public function checkIn(EventRegistration $registration)
-{
-    // Balikkan status kehadiran
-    $registration->update([
-        'is_attended' => !$registration->is_attended 
-    ]);
-
-    return back()->with('success', 'Status kehadiran berhasil diperbarui!');
-}
-public function history()
-{
-    // Mengambil riwayat pendaftaran milik user yang sedang login
-    $myRegistrations = EventRegistration::with('event.secretariat')
-                        ->where('user_id', auth()->id())
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-
-    return view('events.history', compact('myRegistrations'));
-}
-public function downloadCertificate(EventRegistration $registration)
-{
-    // 1. Keamanan: Pastikan yang download adalah pemilik akun
-    if ($registration->user_id !== auth()->id()) {
-        abort(403, 'Akses ditolak.');
-    }
-
-    // 2. Keamanan: Pastikan sudah ditandai HADIR oleh admin
-    if (!$registration->is_attended) {
-        return back()->with('error', 'Sertifikat belum tersedia karena Anda belum terdata hadir.');
-    }
-
-    // 3. Ambil data lengkap untuk sertifikat
-    $data = [
-        'nama' => $registration->user->name,
-        'kegiatan' => $registration->event->title,
-        'tanggal' => \Carbon\Carbon::parse($registration->event->event_date)->format('d F Y'),
-        'nomor_sertifikat' => 'AAT/' . $registration->event->id . '/' . $registration->user->id . '/' . date('Y'),
-        'sekre' => $registration->event->secretariat->name,
-    ];
-
-    // 4. Render view ke PDF
-    $pdf = Pdf::loadView('emails.certificate_template', $data)->setPaper('a4', 'landscape');
-
-    // 5. Download file
-    return $pdf->download('Sertifikat_' . $registration->event->title . '.pdf');
-}
-// Menampilkan halaman Edit Kegiatan
-    public function edit($id)
+    public function edit(Event $event)
     {
-        $event = Event::findOrFail($id);
+        if (auth()->user()->hasRole('Admin Sekre') && $event->secretariat_id !== auth()->user()->secretariat_id) {
+            abort(403, 'Akses Ditolak.');
+        }
+        $secretariats = Secretariat::all();
+        return view('admin.events.edit', compact('event', 'secretariats'));
+    }
 
-        // Keamanan: Pastikan admin hanya bisa edit kegiatan di sekrenya sendiri (kecuali Pusat)
-        if (!auth()->user()->hasRole('Super Admin Pusat') && $event->secretariat_id != auth()->user()->secretariat_id) {
-            abort(403, 'Anda tidak memiliki akses untuk mengedit kegiatan ini.');
+    public function update(Request $request, Event $event)
+    {
+        if (auth()->user()->hasRole('Admin Sekre') && $event->secretariat_id !== auth()->user()->secretariat_id) {
+            abort(403, 'Akses Ditolak.');
         }
 
-        return view('admin.events.edit', compact('event'));
-    }
-
-    // Memproses Perubahan (Update)
-    public function update(Request $request, $id)
-    {
-        $event = Event::findOrFail($id);
-        
         $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'required|string',
             'event_date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'location' => 'required|string|max:255',
             'quota' => 'required|integer|min:1',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'secretariat_id' => 'required|exists:secretariats,id',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $event->title = $request->title;
-        $event->description = $request->description;
-        $event->event_date = $request->event_date;
-        $event->start_time = $request->start_time;
-        $event->end_time = $request->end_time;
-        $event->quota = $request->quota;
+        $data = $request->except('cover_image');
 
-        // Jika admin mengunggah foto cover baru
         if ($request->hasFile('cover_image')) {
-            // Hapus foto lama dari folder storage
-            if ($event->cover_image) {
-                Storage::disk('public')->delete($event->cover_image);
+            if ($event->cover_image && file_exists(storage_path('app/public/' . $event->cover_image))) {
+                unlink(storage_path('app/public/' . $event->cover_image));
             }
-            // Simpan foto baru
-            $event->cover_image = $request->file('cover_image')->store('event_covers', 'public');
+            $data['cover_image'] = $request->file('cover_image')->store('event_covers', 'public');
         }
 
-        $event->save();
-
-        return redirect()->route('admin.events.index')->with('success', 'Data kegiatan berhasil diperbarui!');
+        $event->update($data);
+        return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil diperbarui!');
     }
 
-    // Memproses Hapus Kegiatan
-    public function destroy($id)
+    public function destroy(Event $event)
     {
-        $event = Event::findOrFail($id);
-        
-        // Hapus foto cover dari folder storage jika ada
-        if ($event->cover_image) {
-            Storage::disk('public')->delete($event->cover_image);
+        if (auth()->user()->hasRole('Admin Sekre') && $event->secretariat_id !== auth()->user()->secretariat_id) {
+            abort(403, 'Akses Ditolak.');
+        }
+        $event->delete();
+        return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil dihapus!');
+    }
+
+    public function participants(Event $event)
+    {
+        if (auth()->user()->hasRole('Admin Sekre') && $event->secretariat_id !== auth()->user()->secretariat_id) {
+            abort(403, 'Akses Ditolak.');
+        }
+        $registrations = EventRegistration::with('user')->where('event_id', $event->id)->get();
+        return view('admin.events.participants', compact('event', 'registrations'));
+    }
+
+    public function checkIn(EventRegistration $registration)
+    {
+        if (auth()->user()->hasRole('Admin Sekre') && $registration->event->secretariat_id !== auth()->user()->secretariat_id) {
+            abort(403, 'Akses Ditolak.');
         }
         
-        $event->delete();
+        // Logika Toggle (Saklar)
+        if ($registration->status === 'Attended') {
+            $registration->update(['status' => 'Registered']);
+            return redirect()->back()->with('success', 'Status kehadiran berhasil DIBATALKAN.');
+        } else {
+            $registration->update(['status' => 'Attended']);
+            return redirect()->back()->with('success', 'Relawan berhasil ditandai HADIR!');
+        }
+    }
 
-        return redirect()->route('admin.events.index')->with('success', 'Kegiatan berhasil dihapus!');
+
+    // --- SISI RELAWAN ---
+
+    public function index()
+    {
+        $events = Event::with('secretariat')
+            ->whereDate('event_date', '>=', now())
+            ->orderBy('event_date', 'asc')
+            ->get();
+
+        foreach ($events as $event) {
+            $terdaftar = EventRegistration::where('event_id', $event->id)->count();
+            $event->sisa_kuota = max(0, $event->quota - $terdaftar);
+            $event->is_penuh = $event->sisa_kuota === 0;
+            
+            if (auth()->check()) {
+                $event->is_joined = EventRegistration::where('event_id', $event->id)
+                                    ->where('user_id', auth()->id())
+                                    ->exists();
+            } else {
+                $event->is_joined = false;
+            }
+        }
+        return view('events.index', compact('events'));
+    }
+
+    public function join(Event $event)
+    {
+        $user = auth()->user();
+
+        if (Carbon::parse($event->event_date)->isPast()) {
+            return redirect()->back()->with('error', 'Maaf, kegiatan ini sudah berlalu.');
+        }
+
+        $jumlahPendaftar = EventRegistration::where('event_id', $event->id)->count();
+        if ($jumlahPendaftar >= $event->quota) {
+            return redirect()->back()->with('error', 'Maaf, pendaftaran gagal. Kuota kegiatan ini sudah penuh!');
+        }
+
+        $sudahDaftar = EventRegistration::where('event_id', $event->id)
+                                        ->where('user_id', $user->id)
+                                        ->exists();
+
+        if ($sudahDaftar) {
+            return redirect()->back()->with('error', 'Anda sudah terdaftar di kegiatan ini.');
+        }
+
+        EventRegistration::create([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'status' => 'Registered',
+        ]);
+
+        return redirect()->route('events.history')->with('success', 'Berhasil mendaftar kegiatan! Jangan lupa hadir ya.');
+    }
+
+    public function history()
+    {
+        $user = auth()->user();
+        
+        // Ambil data pendaftaran dan urutkan menggunakan Collection sortByDesc
+        $registrations = EventRegistration::with('event.secretariat')
+                            ->where('user_id', $user->id)
+                            ->get()
+                            ->sortByDesc(function ($registration) {
+                                return $registration->event->event_date ?? now();
+                            });
+
+        return view('events.history', compact('registrations'));
+    }
+
+    public function cancel(EventRegistration $registration)
+    {
+        $user = auth()->user();
+        if ($registration->user_id !== $user->id) abort(403, 'Akses ditolak.');
+        if ($registration->status !== 'Registered') return redirect()->back()->with('error', 'Anda tidak dapat membatalkan kegiatan yang sudah selesai.');
+        if (Carbon::parse($registration->event->event_date)->isPast()) return redirect()->back()->with('error', 'Tidak dapat membatalkan kegiatan yang lewat.');
+
+        $registration->delete();
+        return redirect()->route('events.history')->with('success', 'Pendaftaran dibatalkan. Kuota telah dikembalikan.');
+    }
+
+    public function downloadCertificate(EventRegistration $registration)
+    {
+        if (auth()->id() !== $registration->user_id) abort(403);
+        if ($registration->status !== 'Attended') abort(403, 'Sertifikat belum tersedia.');
+
+        $pdf = Pdf::loadView('emails.certificate_template', ['registration' => $registration])
+                  ->setPaper('a4', 'landscape');
+        return $pdf->download('Sertifikat_AAT_'.$registration->event->title.'.pdf');
     }
 }

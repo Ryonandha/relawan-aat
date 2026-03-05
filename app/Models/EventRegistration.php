@@ -12,7 +12,8 @@ class EventRegistration extends Model
     use HasFactory;
 
     protected $guarded = []; // Mengizinkan insert data ke semua kolom
-
+    protected $fillable = ['event_id', 'user_id', 'status']; // <- tambahkan 'status'
+    
     // Relasi balik ke User (Relawan)
     public function user()
     {

@@ -14,8 +14,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex-shrink-0 flex items-center gap-2">
-                    <div class="w-10 h-10 bg-aat-blue rounded-full flex items-center justify-center text-aat-yellow font-bold text-xl">AAT</div>
-                    <span class="font-bold text-xl text-aat-blue tracking-tight">Relawan<span class="text-aat-yellow">AAT</span></span>
+                    <img src="{{ asset('storage/logo/logo-AAT.png') }}" alt="Logo AAT" class="h-10 w-auto">
+<span class="font-bold text-xl text-aat-blue tracking-tight">Relawan<span class="text-aat-yellow">AAT</span></span>
                 </div>
                 <div class="flex items-center gap-4">
                     @if (Route::has('login'))

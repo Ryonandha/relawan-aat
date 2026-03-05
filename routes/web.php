@@ -50,7 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/kegiatan/{event}/join', [EventController::class, 'join'])->name('events.join');
     Route::get('/riwayat-kegiatan', [EventController::class, 'history'])->name('events.history');
     Route::get('/sertifikat/download/{registration}', [EventController::class, 'downloadCertificate'])->name('certificate.download');
-
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/riwayat-kegiatan', [EventController::class, 'history'])->name('events.history');
+    Route::delete('/kegiatan/batal/{registration}', [EventController::class, 'cancel'])->name('events.cancel');
+    
     // RUTE BERSAMA: Admin Sekre & Pusat
     Route::middleware(['role:Admin Sekre|Super Admin Pusat'])->group(function () {
         // Manajemen Kegiatan
