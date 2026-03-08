@@ -6,13 +6,15 @@ Aplikasi berbasis web ini dibangun untuk mempermudah pengelolaan relawan, penjad
 
 - **Sistem Autentikasi & Multi-Role:** Menggunakan Laravel Breeze & Spatie Permission. Terdapat 3 tingkat hak akses:
   - **Super Admin Pusat:** Mengelola seluruh data kegiatan dari semua regional dan memiliki akses penuh untuk mendaftarkan akun Admin Sekre/Regional baru.
-  - **Admin Sekre (Regional):** Mengelola kegiatan (Membuat, Melihat, Menambahkan Poster Kegiatan), mengelola daftar peserta, dan melakukan presensi khusus di wilayah domisilinya.
-  - **Relawan:** Mendaftar kegiatan sesuai regionalnya, mengelola profil (termasuk update domisili sekre), dan mengunduh sertifikat.
-- **Filter Regional Dinamis:** Sistem secara cerdas memfilter tampilan kegiatan. Relawan dan Admin hanya akan melihat data kegiatan yang relevan dengan domisili/sekretariat mereka.
-- **Manajemen Kegiatan & Presensi:** Admin dapat membuat acara baru lengkap dengan fitur *upload* poster/cover kegiatan, melihat daftar pendaftar, dan menandai kehadiran (*check-in*) peserta pada hari-H.
-- **Dashboard Statistik:** Menampilkan ringkasan data secara *real-time* seperti Total Relawan, Total Sekre Aktif, dan Total Kegiatan.
-- **Sertifikat Digital Otomatis (PDF):** Relawan yang ditandai "Hadir" oleh Admin dapat langsung mengunduh sertifikat PDF yang di-*generate* secara otomatis menggunakan `laravel-dompdf`.
-- **UI/UX Modern & Responsif:** Desain antarmuka dikustomisasi menggunakan Tailwind CSS dengan mengusung identitas warna khas AAT (Biru Navy & Kuning Emas).
+  - **Admin Sekre (Regional):** Mengelola kegiatan, mengelola daftar peserta, dan melakukan presensi khusus di wilayah domisilinya.
+  - **Relawan:** Mendaftar kegiatan sesuai regionalnya, mengelola profil, dan mengunduh sertifikat.
+- **Dashboard Dinamis & Informatif:** Tampilan panel kontrol yang menyesuaikan peran. Admin melihat statistik skala nasional/regional, sementara relawan melihat riwayat partisipasi, sertifikat terkumpul, dan kartu pengingat jadwal kegiatan terdekat.
+- **Manajemen Kegiatan Lengkap:** Pembuatan acara lengkap dengan lokasi spesifik, jam mulai/selesai, kuota pendaftar, dan poster kegiatan.
+- **Filter Regional Dinamis:** Relawan dan Admin hanya akan melihat data kegiatan dan relawan yang relevan dengan domisili/sekretariat mereka.
+- **Pencarian & Paginasi (Data Skala Besar):** Dilengkapi fitur pencarian *real-time* dan pembagian halaman (pagination) pada manajemen pengguna dan kegiatan untuk performa web yang cepat.
+- **Export Data Absensi (CSV/Excel):** Admin dapat mengunduh daftar pendaftar (termasuk Nama, WhatsApp, dan ID SIANAS) sebagai format `.csv` untuk keperluan absensi cetak di lapangan.
+- **Sertifikat Digital Otomatis (PDF):** Relawan yang ditandai "Hadir" (Check-in) pada hari-H oleh Admin, dapat langsung mengunduh sertifikat penghargaan dalam format PDF yang elegan secara otomatis.
+- **UI/UX Modern & Responsif:** Desain antarmuka dikustomisasi menggunakan Tailwind CSS dengan mengusung identitas warna khas AAT (Biru & Kuning).
 
 ## 🛠️ Teknologi yang Digunakan
 
@@ -23,70 +25,74 @@ Aplikasi berbasis web ini dibangun untuk mempermudah pengelolaan relawan, penjad
   - `spatie/laravel-permission` (Manajemen Hak Akses & Peran)
   - `barryvdh/laravel-dompdf` (Generator Sertifikat PDF)
 
-## 📦 Panduan Instalasi (Environment Development)
+## 💻 Panduan Instalasi (Environment Development)
 
-Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*localhost*) atau *server* pengujian:
+Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*localhost*):
 
 1. **Clone Repositori:**
    ```bash
    git clone https://github.com/Ryonandha/relawan-aat.git
    cd relawan-aat
+```
 
 2. **Install Dependensi Backend & Frontend:**
-Pastikan Anda sudah menginstal PHP, Composer, dan Node.js di komputer Anda.
+Pastikan Anda sudah menginstal PHP, Composer, dan Node.js.
 ```bash
 composer install
 npm install
 ```
 
+
 3. **Konfigurasi Environment:**
-Salin file pengaturan bawaan menjadi file `.env` aktif, lalu sesuaikan kredensial database Anda (Nama database, *username*, dan *password*).
+Salin file `.env.example` menjadi `.env`, lalu sesuaikan kredensial *database* Anda (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
 ```bash
 cp .env.example .env
 php artisan key:generate
-
 ```
 
-4. **Link Folder Storage (Penting untuk Upload Foto):**
+
+4. **Link Folder Storage (Penting untuk Gambar & Sertifikat):**
 Agar file gambar/poster yang diunggah dapat diakses secara publik.
 ```bash
 php artisan storage:link
-
 ```
+
 
 5. **Migrasi dan Inisialisasi Data (Seeder):**
-Jalankan perintah ini untuk membangun tabel *database* dan menyuntikkan akun *dummy* (Super Admin & Admin Sekre) ke dalam sistem.
+Jalankan perintah ini untuk membangun tabel *database* dan menyuntikkan akun *dummy* komplit (termasuk Regional, Pengurus, Relawan, dan Kegiatan masa lalu/depan).
 ```bash
-php artisan migrate --seed
-
+php artisan migrate:fresh --seed
 ```
+
 
 6. **Jalankan Aplikasi:**
-Buka dua terminal (*command prompt*) dan jalankan kedua perintah ini secara bersamaan:
+Buka dua terminal (*command prompt*) terpisah dan jalankan kedua perintah ini:
 ```bash
 php artisan serve
-
 ```
+
 
 ```bash
 npm run dev
-
 ```
+
 
 Aplikasi sekarang dapat diakses melalui browser di: `http://localhost:8000`
 
-## 🔐 Akun Default (Untuk Testing)
+## 🔑 Akun Default (Hasil Seeder)
 
-Gunakan kredensial berikut untuk menguji sistem pertama kali:
+Setelah menjalankan `php artisan migrate:fresh --seed`, gunakan kredensial berikut untuk menguji sistem:
 
-* **Super Admin Pusat:**
-    * Email: `superadmin@aat.or.id` (atau `superadmin@gmail.com` bergantung pada konfigurasi seeder Anda)
-    * Password: `password`
-
-
-* **Admin Sekre (Contoh: Purwokerto):**
-    * Email: `purwokerto@aat.or.id` (atau `admin@gmail.com`)
-    * Password: `password`
+* **Super Admin Pusat (Akses Semua Wilayah):**
+* Email: `pusat@aat.or.id`
+* Password: `password`
 
 
-* **Relawan:** Silakan daftar secara langsung (buat akun baru) melalui menu **Register** di halaman utama website.
+* **Admin Sekre Regional (Akses Terbatas Per Wilayah):**
+* Email: `purwokerto@aat.or.id`  *(atau `yogyakarta@aat.or.id`)*
+* Password: `password`
+
+
+* **Relawan (Contoh Akun yang Sudah Terdaftar Kegiatan):**
+* Email: `budi@gmail.com`
+* Password: `password`
