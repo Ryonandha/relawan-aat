@@ -257,4 +257,41 @@ class EventController extends Controller
                   ->setPaper('a4', 'landscape');
         return $pdf->download('Sertifikat_AAT_'.$registration->event->title.'.pdf');
     }
+    public function exportParticipants(Event $event)
+    {
+        // Proteksi Akses
+        if (auth()->user()->hasRole('Admin Sekre') && $event->secretariat_id !== auth()->user()->secretariat_id) {
+            abort(403, 'Akses Ditolak.');
+        }
+
+        // Ambil data pendaftar
+        $registrations = EventRegistration::with('user')->where('event_id', $event->id)->get();
+
+        // Buat nama file rapi (Contoh: Absensi-Bakti-Sosial.csv)
+        $fileName = 'Absensi-' . \Illuminate\Support\Str::slug($event->title) . '.csv';
+
+        // Fitur Stream Download bawaan Laravel
+        return response()->streamDownload(function () use ($registrations) {
+            $file = fopen('php://output', 'w');
+            
+            // 1. Buat Baris Judul Kolom (Header)
+            fputcsv($file, ['No', 'Nama Relawan', 'ID SIANAS', 'Nomor WhatsApp', 'Email', 'Status Kehadiran']);
+
+            // 2. Isi Data Baris per Baris
+            $no = 1;
+            foreach ($registrations as $reg) {
+                $status = $reg->status === 'Attended' ? 'HADIR (Check-In)' : 'TERDAFTAR (Belum Hadir)';
+                fputcsv($file, [
+                    $no++,
+                    $reg->user->name,
+                    $reg->user->sianas_id ?? 'Belum Ada',
+                    // Tambahkan spasi di depan nomor HP agar angka "0" di awal tidak hilang saat dibuka di Excel
+                    " " . ($reg->user->phone_number ?? '-'),
+                    $reg->user->email,
+                    $status
+                ]);
+            }
+            fclose($file);
+        }, $fileName);
+    }
 }

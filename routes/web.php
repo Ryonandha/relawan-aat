@@ -61,6 +61,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/events/create', [EventController::class, 'create'])->name('admin.events.create');
         Route::post('/admin/events', [EventController::class, 'store'])->name('admin.events.store');
         Route::get('/admin/events/{event}/participants', [EventController::class, 'participants'])->name('admin.events.participants');
+        Route::get('/admin/events/{event}/export', [EventController::class, 'exportParticipants'])->name('admin.events.export');
+        Route::post('/admin/events/checkin/{registration}', [EventController::class, 'checkIn'])->name('admin.events.checkin');
         Route::post('/admin/registrations/{registration}/check-in', [EventController::class, 'checkIn'])->name('admin.events.checkin');
         Route::get('/admin/events/{event}/edit', [EventController::class, 'edit'])->name('admin.events.edit');
         Route::put('/admin/events/{event}', [EventController::class, 'update'])->name('admin.events.update');
