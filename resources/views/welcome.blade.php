@@ -40,7 +40,7 @@
                 Mari Berbagi Cahaya <br class="hidden md:block"> Bersama <span class="text-aat-yellow">Anak-Anak Terang</span>
             </h1>
             <p class="mt-4 text-xl text-blue-200 max-w-3xl mx-auto mb-10">
-                Bergabunglah menjadi relawan dan bantu anak-anak serta mahasiswa dari keluarga kurang mampu untuk mendapatkan akses pendidikan yang layak dan berkelanjutan.
+                Bergabunglah menjadi relawan dan bantu anak-anak serta siswa dari keluarga kurang mampu untuk mendapatkan akses pendidikan yang layak dan berkelanjutan.
             </p>
             <div class="flex justify-center gap-4">
                 <a href="#kegiatan" class="bg-aat-yellow hover:bg-yellow-500 text-aat-text px-8 py-3 rounded-full font-bold text-lg transition shadow-lg">
