@@ -118,6 +118,7 @@ class UserController extends Controller
     }
 
     // 4. Memproses Update Pengguna (Termasuk ID SIANAS)
+    // 4. Memproses Update Pengguna (Termasuk ID SIANAS & Nomor Telepon)
     public function update(Request $request, User $user) {
         $currentUser = auth()->user();
 
@@ -128,10 +129,11 @@ class UserController extends Controller
             }
         }
 
-        // Aturan validasi dasar
+        // Aturan validasi dasar (TAMBAHKAN PHONE NUMBER DI SINI)
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,'.$user->id,
+            'phone_number' => 'nullable|string|max:20', // <- Validasi Telepon
             'secretariat_id' => 'required|exists:secretariats,id',
         ];
 
@@ -142,10 +144,11 @@ class UserController extends Controller
 
         $request->validate($rules);
 
-        // Siapkan data yang akan diupdate
+        // Siapkan data yang akan diupdate (TAMBAHKAN PHONE NUMBER DI SINI JUGA)
         $dataToUpdate = [
             'name' => $request->name, 
             'email' => $request->email, 
+            'phone_number' => $request->phone_number, // <- Simpan Telepon ke DB
             'secretariat_id' => $request->secretariat_id
         ];
 

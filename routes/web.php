@@ -23,21 +23,40 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
 
     if ($user->hasRole('Super Admin Pusat')) {
-        $totalRelawan = User::role('Relawan')->count();
-        $totalSekre = Secretariat::count();
-        $totalKegiatan = Event::count();
+        $totalRelawan = \App\Models\User::role('Relawan')->count();
+        $totalSekre = \App\Models\Secretariat::count();
+        $totalKegiatan = \App\Models\Event::count();
         $labelStat = "Nasional (Seluruh Regional)";
+        return view('dashboard', compact('totalRelawan', 'totalSekre', 'totalKegiatan', 'labelStat'));
+        
     } elseif ($user->hasRole('Admin Sekre')) {
-        $totalRelawan = User::role('Relawan')->where('secretariat_id', $user->secretariat_id)->count();
+        $totalRelawan = \App\Models\User::role('Relawan')->where('secretariat_id', $user->secretariat_id)->count();
         $totalSekre = 1;
-        $totalKegiatan = Event::where('secretariat_id', $user->secretariat_id)->count();
+        $totalKegiatan = \App\Models\Event::where('secretariat_id', $user->secretariat_id)->count();
         $labelStat = "Regional " . ($user->secretariat->name ?? '');
+        return view('dashboard', compact('totalRelawan', 'totalSekre', 'totalKegiatan', 'labelStat'));
+        
     } else {
-        $totalRelawan = 0; $totalSekre = 0; $totalKegiatan = 0;
-        $labelStat = "";
-    }
+        // --- DATA KHUSUS DASHBOARD RELAWAN ---
+        $totalDiikuti = \App\Models\EventRegistration::where('user_id', $user->id)->count();
+        $totalSertifikat = \App\Models\EventRegistration::where('user_id', $user->id)->where('status', 'Attended')->count();
+        
+        // Ambil maksimal 3 jadwal kegiatan ke depan yang sudah didaftar relawan ini
+        $kegiatanMendatang = \App\Models\EventRegistration::with('event.secretariat')
+            ->where('user_id', $user->id)
+            ->where('status', 'Registered')
+            ->get()
+            ->filter(function ($reg) {
+                // Hanya ambil yang tanggalnya hari ini atau di masa depan
+                return \Carbon\Carbon::parse($reg->event->event_date)->endOfDay()->isFuture();
+            })
+            ->sortBy(function ($reg) {
+                return $reg->event->event_date;
+            })
+            ->take(3);
 
-    return view('dashboard', compact('totalRelawan', 'totalSekre', 'totalKegiatan', 'labelStat'));
+        return view('dashboard', compact('totalDiikuti', 'totalSertifikat', 'kegiatanMendatang'));
+    }
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // KELOMPOK YANG WAJIB LOGIN
