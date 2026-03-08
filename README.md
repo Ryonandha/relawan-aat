@@ -30,9 +30,10 @@ Aplikasi berbasis web ini dibangun untuk mempermudah pengelolaan relawan, penjad
 Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*localhost*):
 
 1. **Clone Repositori:**
-   ```bash
-   git clone https://github.com/Ryonandha/relawan-aat.git
-   cd relawan-aat
+```bash
+git clone https://github.com/Ryonandha/relawan-aat.git
+cd relawan-aat
+```
 
 2. **Install Dependensi Backend & Frontend:**
 Pastikan Anda sudah menginstal PHP, Composer, dan Node.js.
@@ -41,7 +42,6 @@ composer install
 npm install
 ```
 
-
 3. **Konfigurasi Environment:**
 Salin file `.env.example` menjadi `.env`, lalu sesuaikan kredensial *database* Anda (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).
 ```bash
@@ -49,13 +49,11 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-
 4. **Link Folder Storage (Penting untuk Gambar & Sertifikat):**
 Agar file gambar/poster yang diunggah dapat diakses secara publik.
 ```bash
 php artisan storage:link
 ```
-
 
 5. **Migrasi dan Inisialisasi Data (Seeder):**
 Jalankan perintah ini untuk membangun tabel *database* dan menyuntikkan akun *dummy* komplit (termasuk Regional, Pengurus, Relawan, dan Kegiatan masa lalu/depan).
@@ -63,14 +61,11 @@ Jalankan perintah ini untuk membangun tabel *database* dan menyuntikkan akun *du
 php artisan migrate:fresh --seed
 ```
 
-
 6. **Jalankan Aplikasi:**
 Buka dua terminal (*command prompt*) terpisah dan jalankan kedua perintah ini:
 ```bash
 php artisan serve
 ```
-
-
 ```bash
 npm run dev
 ```
