@@ -9,7 +9,18 @@ class Event extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    // TAMBAHKAN 'location' KE DALAM FILLABLE
+    protected $fillable = [
+        'title', 
+        'description', 
+        'event_date', 
+        'start_time', 
+        'end_time', 
+        'location',     // <- Ini wajib ada agar lokasi bisa disimpan
+        'quota', 
+        'secretariat_id', 
+        'cover_image'
+    ];
 
     public function secretariat()
     {
@@ -20,8 +31,4 @@ class Event extends Model
     {
         return $this->hasMany(EventRegistration::class);
     }
-    protected $fillable = [
-        'title', 'description', 'cover_image', 'event_date', // tambahkan cover_image di sini
-        'start_time', 'end_time', 'quota', 'secretariat_id'
-    ];
 }
