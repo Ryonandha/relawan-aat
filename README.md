@@ -78,15 +78,15 @@ Aplikasi sekarang dapat diakses melalui browser di: `http://localhost:8000`
 Setelah menjalankan `php artisan migrate:fresh --seed`, gunakan kredensial berikut untuk menguji sistem:
 
 * **Super Admin Pusat (Akses Semua Wilayah):**
-* Email: `pusat@aat.or.id`
-* Password: `password`
+  * Email: `pusat@aat.or.id`
+  * Password: `password`
 
 
 * **Admin Sekre Regional (Akses Terbatas Per Wilayah):**
-* Email: `purwokerto@aat.or.id`  *(atau `yogyakarta@aat.or.id`)*
-* Password: `password`
+  * Email: `purwokerto@aat.or.id`  *(atau `yogyakarta@aat.or.id`)*
+  * Password: `password`
 
 
 * **Relawan (Contoh Akun yang Sudah Terdaftar Kegiatan):**
-* Email: `budi@gmail.com`
-* Password: `password`
+  * Email: `budi@gmail.com`
+  * Password: `password`
