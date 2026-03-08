@@ -11,29 +11,71 @@ use Illuminate\Validation\Rules;
 class UserController extends Controller
 {
     // 1. Menampilkan Tabel Pengguna
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+        
+        // Tangkap kata kunci pencarian dari URL
+        $search = $request->input('search');
 
         if ($user->hasRole('Super Admin Pusat')) {
-            $admins = User::with(['secretariat', 'roles'])->whereHas('roles', function($q) {
-                $q->whereIn('name', ['Admin Sekre', 'Super Admin Pusat']);
-            })->get();
-            $relawans = User::with(['secretariat', 'roles'])->whereHas('roles', function($q) {
-                $q->where('name', 'Relawan');
-            })->get();
+            // --- SUPER ADMIN: BISA LIHAT SEMUA ---
+            
+            // 1. Ambil Admin dengan Search & Pagination
+            $admins = User::with(['secretariat', 'roles'])
+                ->whereHas('roles', function($q) {
+                    $q->whereIn('name', ['Admin Sekre', 'Super Admin Pusat']);
+                })
+                ->when($search, function ($query, $search) {
+                    return $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate(10, ['*'], 'admin_page') // Pagination khusus Admin
+                ->appends(['search' => $search]);   // Bawa keyword search ke halaman berikutnya
+
+            // 2. Ambil Relawan dengan Search & Pagination
+            $relawans = User::with(['secretariat', 'roles'])
+                ->whereHas('roles', function($q) {
+                    $q->where('name', 'Relawan');
+                })
+                ->when($search, function ($query, $search) {
+                    return $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%")
+                          ->orWhere('sianas_id', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate(10, ['*'], 'relawan_page') // Pagination khusus Relawan
+                ->appends(['search' => $search]);
+
             $namaRegional = 'Semua Wilayah (Nasional)';
+
         } else {
-            $admins = collect(); 
+            // --- ADMIN SEKRE: HANYA LIHAT REGIONALNYA SAJA ---
+            
+            $admins = collect(); // Kosong untuk Admin Sekre
+            
             $relawans = User::with(['secretariat', 'roles'])
                 ->where('secretariat_id', $user->secretariat_id)
                 ->whereHas('roles', function($q) {
                     $q->where('name', 'Relawan');
-                })->get();
+                })
+                ->when($search, function ($query, $search) {
+                    return $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%")
+                          ->orWhere('sianas_id', 'like', "%{$search}%");
+                    });
+                })
+                ->paginate(10, ['*'], 'relawan_page')
+                ->appends(['search' => $search]);
+
             $namaRegional = $user->secretariat->name ?? 'Wilayah';
         }
 
-        return view('admin.users.index', compact('admins', 'relawans', 'namaRegional'));
+        return view('admin.users.index', compact('admins', 'relawans', 'namaRegional', 'search'));
     }
 
     // 2. Pusat Menambah Admin Sekre

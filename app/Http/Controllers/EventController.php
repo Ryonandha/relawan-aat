@@ -13,24 +13,43 @@ class EventController extends Controller
 {
     // --- SISI ADMIN ---
 
-    public function adminIndex()
+    public function adminIndex(\Illuminate\Http\Request $request)
     {
         $user = auth()->user();
+        
+        // Tangkap kata kunci pencarian dari URL
+        $search = $request->input('search');
 
         if ($user->hasRole('Super Admin Pusat')) {
-            $events = Event::with('secretariat')->orderBy('event_date', 'desc')->get();
-            $namaRegional = 'Semua Wilayah (Nasional)'; // Tambahkan variabel ini
+            // Super Admin: Lihat semua event dengan fitur search dan paginasi
+            $events = Event::with('secretariat')
+                ->when($search, function ($query, $search) {
+                    return $query->where('title', 'like', "%{$search}%")
+                                 ->orWhere('location', 'like', "%{$search}%");
+                })
+                ->orderBy('event_date', 'desc')
+                ->paginate(9) // Tampilkan 9 kotak per halaman agar pas dengan grid 3 kolom
+                ->appends(['search' => $search]);
+                
+            $namaRegional = 'Semua Wilayah (Nasional)';
         } else {
+            // Admin Sekre: Hanya lihat event regionalnya dengan fitur search dan paginasi
             $events = Event::with('secretariat')
                 ->where('secretariat_id', $user->secretariat_id)
+                ->when($search, function ($query, $search) {
+                    return $query->where(function ($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%")
+                          ->orWhere('location', 'like', "%{$search}%");
+                    });
+                })
                 ->orderBy('event_date', 'desc')
-                ->get();
-            // Ambil nama regional dari user sekre yang login
-            $namaRegional = $user->secretariat->name ?? 'Wilayah'; // Tambahkan variabel ini
+                ->paginate(9)
+                ->appends(['search' => $search]);
+                
+            $namaRegional = $user->secretariat->name ?? 'Wilayah';
         }
 
-        // Jangan lupa kirim $namaRegional ke dalam view
-        return view('admin.events.index', compact('events', 'namaRegional'));
+        return view('admin.events.index', compact('events', 'namaRegional', 'search'));
     }
 
     public function create()

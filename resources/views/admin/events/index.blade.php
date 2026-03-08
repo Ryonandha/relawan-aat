@@ -19,12 +19,28 @@
                 </div>
             @endif
 
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-gray-500 font-medium">Cari kegiatan berdasarkan nama acara atau lokasi.</p>
+                <form action="{{ route('admin.events.index') }}" method="GET" class="w-full sm:w-1/3 flex">
+                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari kegiatan..." class="w-full border-gray-300 rounded-l-lg focus:ring-aat-blue focus:border-aat-blue text-sm">
+                    <button type="submit" class="bg-aat-blue text-white px-4 rounded-r-lg font-bold hover:bg-blue-800 transition">Cari</button>
+                    @if(isset($search) && $search != '')
+                        <a href="{{ route('admin.events.index') }}" class="bg-gray-200 text-gray-700 px-4 rounded-r-lg font-bold flex items-center ml-1 hover:bg-gray-300 transition" title="Reset Pencarian">X</a>
+                    @endif
+                </form>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-xl border-t-4 border-aat-blue p-6">
-<h3 class="text-xl font-extrabold text-gray-800 mb-6">Daftar Kegiatan: <span class="text-aat-yellow">{{ $namaRegional }}</span></h3>                
+                <h3 class="text-xl font-extrabold text-gray-800 mb-6">Daftar Kegiatan: <span class="text-aat-yellow">{{ $namaRegional }}</span></h3>                
+                
                 @if($events->isEmpty())
                     <div class="text-center py-10 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                        <p class="text-gray-500 font-medium">Belum ada kegiatan yang dibuat di regional ini.</p>
-                        <a href="{{ route('admin.events.create') }}" class="text-aat-blue font-bold hover:underline mt-2 inline-block">Buat kegiatan pertama sekarang!</a>
+                        @if(isset($search) && $search != '')
+                            <p class="text-gray-500 font-medium">Tidak ada kegiatan yang cocok dengan kata kunci "{{ $search }}".</p>
+                        @else
+                            <p class="text-gray-500 font-medium">Belum ada kegiatan yang dibuat di regional ini.</p>
+                            <a href="{{ route('admin.events.create') }}" class="text-aat-blue font-bold hover:underline mt-2 inline-block">Buat kegiatan pertama sekarang!</a>
+                        @endif
                     </div>
                 @else
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -37,12 +53,17 @@
                                     <p class="text-sm font-semibold text-gray-600 mb-3 bg-gray-100 inline-block px-2 py-1 rounded">
                                         📅 {{ \Carbon\Carbon::parse($event->event_date)->format('d F Y') }}
                                     </p>
+                                    
+                                    @if($event->location)
+                                        <p class="text-xs text-gray-500 mb-2">📍 {{ $event->location }}</p>
+                                    @endif
+
                                     <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $event->description }}</p>
                                 </div>
                                 
                                 <div class="border-t border-gray-100 pt-4 mt-auto">
                                     <div class="flex justify-between items-center mb-3 text-sm">
-                                        <span class="text-gray-500">Pendaftar: <strong>{{ $event->registrations_count }} / {{ $event->quota }}</strong></span>
+                                        <span class="text-gray-500">Pendaftar: <strong>{{ \App\Models\EventRegistration::where('event_id', $event->id)->count() }} / {{ $event->quota }}</strong></span>
                                         <span class="text-gray-500">Jam: <strong>{{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }}</strong></span>
                                     </div>
                                     <div class="flex gap-2">
@@ -65,6 +86,10 @@
                                 </div>
                             </div>
                         @endforeach
+                    </div>
+
+                    <div class="mt-8">
+                        {{ $events->links() }}
                     </div>
                 @endif
 
