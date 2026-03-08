@@ -33,7 +33,6 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek ini di komputer lokal (*l
    ```bash
    git clone https://github.com/Ryonandha/relawan-aat.git
    cd relawan-aat
-```
 
 2. **Install Dependensi Backend & Frontend:**
 Pastikan Anda sudah menginstal PHP, Composer, dan Node.js.
